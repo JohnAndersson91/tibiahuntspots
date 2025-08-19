@@ -15,68 +15,95 @@
   #addSpotForm { margin-top:20px; display:flex; flex-direction:column; gap:5px; }
   input, button, select { padding:5px; border-radius:4px; border:none; }
   button { cursor:pointer; background:#555; color:#fff; }
+  #loginDiv, #formDiv { margin-top:20px; }
 </style>
 </head>
 <body>
 
 <h1>Tibia Hunt Spots</h1>
 
-<!-- Section Selector -->
-<select id="sectionSelector">
-  <option value="All">All Classes</option>
-  <option value="Knight">Knight</option>
-  <option value="Paladin">Paladin</option>
-  <option value="Mages">Mages</option>
-  <option value="Monk">Monk</option>
-  <option value="Duo">Duo</option>
-</select>
+<div id="loginDiv">
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button id="loginBtn">Login</button>
+  <span id="loginMsg" style="margin-left:10px;"></span>
+</div>
 
-<!-- Spots Table -->
-<table>
-  <thead>
-    <tr>
-      <th>Spot</th>
-      <th id="levelHeader">Level <span class="arrow"></span></th>
-      <th id="expHeader">Raw Exp <span class="arrow"></span></th>
-      <th id="profitHeader">Profit <span class="arrow"></span></th>
-      <th>Images</th>
-    </tr>
-  </thead>
-  <tbody id="spotsBody"></tbody>
-</table>
+<div id="mainContent" style="display:none;">
+  <!-- Section Selector -->
+  <select id="sectionSelector">
+    <option value="All">All Classes</option>
+    <option value="Knight">Knight</option>
+    <option value="Paladin">Paladin</option>
+    <option value="Mages">Mages</option>
+    <option value="Monk">Monk</option>
+    <option value="Duo">Duo</option>
+  </select>
 
-<!-- Add Spot Form -->
-<div id="formDiv">
-  <form id="addSpotForm">
-    <input type="text" id="spotName" placeholder="Spot Name" required>
-    <select id="sectionSelect" required>
-      <option value="" disabled selected>Select Class</option>
-      <option value="Knight">Knight</option>
-      <option value="Paladin">Paladin</option>
-      <option value="Mages">Mages</option>
-      <option value="Monk">Monk</option>
-      <option value="Duo">Duo</option>
-    </select>
-    <input type="number" id="level" placeholder="Level" required>
-    <input type="number" id="exp" placeholder="Raw Exp" required>
-    <input type="number" id="profit" placeholder="Profit" required>
-    <input type="file" id="images" multiple accept="image/*">
-    <div id="imagePreview"></div>
-    <button type="submit">Add Spot</button>
-  </form>
+  <!-- Spots Table -->
+  <table>
+    <thead>
+      <tr>
+        <th>Spot</th>
+        <th id="levelHeader">Level <span class="arrow"></span></th>
+        <th id="expHeader">Raw Exp <span class="arrow"></span></th>
+        <th id="profitHeader">Profit <span class="arrow"></span></th>
+        <th>Images</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="spotsBody"></tbody>
+  </table>
+
+  <!-- Add Spot Form -->
+  <div id="formDiv">
+    <form id="addSpotForm">
+      <input type="text" id="spotName" placeholder="Spot Name" required>
+      <select id="sectionSelect" required>
+        <option value="" disabled selected>Select Class</option>
+        <option value="Knight">Knight</option>
+        <option value="Paladin">Paladin</option>
+        <option value="Mages">Mages</option>
+        <option value="Monk">Monk</option>
+        <option value="Duo">Duo</option>
+      </select>
+      <input type="number" id="level" placeholder="Level" required>
+      <input type="number" id="exp" placeholder="Raw Exp" required>
+      <input type="number" id="profit" placeholder="Profit" required>
+      <input type="file" id="images" multiple accept="image/*">
+      <div id="imagePreview"></div>
+      <button type="submit">Add Spot</button>
+    </form>
+  </div>
 </div>
 
 <script>
 let spots = [];
 let currentSection = 'All';
 let sortState = {level:null, exp:null, profit:null}; 
+let loggedIn = false;
+
+// Simple login (hardcoded for demo)
+const user = {username:"admin", password:"1234"};
+const loginBtn = document.getElementById("loginBtn");
+loginBtn.addEventListener("click", ()=>{
+  const u = document.getElementById("username").value;
+  const p = document.getElementById("password").value;
+  if(u===user.username && p===user.password){
+    loggedIn = true;
+    document.getElementById("loginDiv").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
+  } else {
+    document.getElementById("loginMsg").textContent = "Invalid login!";
+  }
+});
 
 const tbody = document.getElementById("spotsBody");
 
 // Render table
 function renderTable() {
   tbody.innerHTML = "";
-  spots.forEach(s => {
+  spots.forEach((s, index) => {
     if(currentSection !== 'All' && s.section !== currentSection) return;
 
     const tr = document.createElement("tr");
@@ -88,9 +115,16 @@ function renderTable() {
       <td>${s.exp}</td>
       <td>${s.profit}</td>
       <td>${imagesHTML}</td>
+      <td>${loggedIn ? `<button onclick="removeSpot(${index})">Remove</button>` : ""}</td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+// Remove spot
+function removeSpot(idx){
+  spots.splice(idx,1);
+  renderTable();
 }
 
 // Sorting
@@ -136,6 +170,8 @@ document.getElementById("images").addEventListener("change", function(){
 // Add spot
 document.getElementById("addSpotForm").addEventListener("submit", function(e){
   e.preventDefault();
+  if(!loggedIn) return alert("Login to add spots");
+
   const files = document.getElementById("images").files;
   const imagesArray = Array.from(files).map(f => URL.createObjectURL(f));
 
