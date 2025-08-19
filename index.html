@@ -4,28 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tibia Hunt Spots</title>
-<style>
-  body { background:#1e1e1e; color:#f0f0f0; font-family:sans-serif; padding:20px; }
-  table { width:100%; border-collapse: collapse; margin-top:20px; }
-  th, td { border:1px solid #444; padding:8px; text-align:left; }
-  th { cursor:pointer; user-select:none; }
-  th .arrow { font-size:0.8em; margin-left:5px; color:#ffcc00; }
-  #imageModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
-    background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
-  #imageModal img { max-width:90%; max-height:90%; }
-  img.thumb { max-width:50px; max-height:50px; margin:2px; cursor:pointer; }
-  #imagePreview img { max-width:50px; max-height:50px; margin:2px; }
-  #addSpotForm { margin-top:20px; display:flex; flex-direction:column; gap:5px; }
-  input, button, select { padding:5px; border-radius:4px; border:none; }
-  button { cursor:pointer; background:#555; color:#fff; }
-  #backupBtn, #loadBackupBtn { margin-top:10px; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <h1>Tibia Hunt Spots</h1>
 
-<!-- Section Selector -->
 <select id="sectionSelector">
   <option value="All">All Classes</option>
   <option value="Knight">Knight</option>
@@ -35,7 +19,6 @@
   <option value="Duo">Duo</option>
 </select>
 
-<!-- Spots Table -->
 <table>
   <thead>
     <tr>
@@ -49,18 +32,15 @@
   <tbody id="spotsBody"></tbody>
 </table>
 
-<!-- Image Modal -->
 <div id="imageModal">
   <img id="modalImg" src="">
 </div>
 
-<!-- Password -->
 <div id="loginDiv">
   <input type="password" id="password" placeholder="Enter password to manage spots">
   <button onclick="checkPassword()">Login</button>
 </div>
 
-<!-- Add Spot Form -->
 <div id="formDiv" style="display:none;">
   <form id="addSpotForm">
     <input type="text" id="spotName" placeholder="Spot Name" required>
@@ -79,166 +59,8 @@
     <div id="imagePreview"></div>
     <button type="submit">Add Spot</button>
   </form>
-
-  <!-- Backup and Load -->
-  <button id="backupBtn">Save Backup</button>
-  <input type="file" id="loadBackupInput" accept=".json">
-  <button id="loadBackupBtn">Load Backup</button>
 </div>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-
-<script>
-/* FIREBASE CONFIG */
-const firebaseConfig = {
-  apiKey: "AIzaSyBkmHIc3xwSz4zoNX1R3OxCPfcoSYUyfB4",
-  authDomain: "tibiahuntspots.firebaseapp.com",
-  databaseURL: "https://tibiahuntspots-default-rtdb.firebaseio.com",
-  projectId: "tibiahuntspots",
-  storageBucket: "tibiahuntspots.appspot.com",
-  messagingSenderId: "1095180317117",
-  appId: "1:1095180317117:web:57bd4d2cf8b22edec4a2d4"
-};
-firebase.initializeApp(firebaseConfig);
-
-const db = firebase.database();
-const spotsRef = db.ref("spots");
-const storage = firebase.storage();
-
-let spots = {};
-let currentSection = "All";
-let sortState = {level:null, exp:null, profit:null};
-const PASSWORD = "willchange321";
-
-/* LISTEN FOR SPOTS */
-spotsRef.on("value", snapshot => {
-  spots = snapshot.val() || {};
-  console.log("🔥 Loaded spots:", spots);
-  renderFirebaseTable();
-});
-
-/* RENDER TABLE */
-function renderFirebaseTable() {
-  const tbody = document.getElementById("spotsBody");
-  tbody.innerHTML = "";
-
-  Object.keys(spots).forEach(key => {
-    const s = spots[key];
-    if(currentSection !== "All" && s.section !== currentSection) return;
-
-    const tr = document.createElement("tr");
-    const imagesHTML = (s.images || []).map(i => `<img src="${i}" class="thumb" onclick="showImage('${i}')">`).join("");
-
-    tr.innerHTML = `
-      <td>${s.spot}</td>
-      <td>${s.level}</td>
-      <td>${s.exp}</td>
-      <td>${s.profit}</td>
-      <td>${imagesHTML}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-/* ADD SPOT */
-document.getElementById("addSpotForm").addEventListener("submit", async function(e){
-  e.preventDefault();
-
-  const files = document.getElementById("images").files;
-  let imageUrls = [];
-
-  for (let file of files) {
-    const storageRef = storage.ref("spots/" + Date.now() + "-" + file.name);
-    await storageRef.put(file);
-    const url = await storageRef.getDownloadURL();
-    imageUrls.push(url);
-  }
-
-  const newSpot = {
-    spot: document.getElementById("spotName").value,
-    section: document.getElementById("sectionSelect").value,
-    level: Number(document.getElementById("level").value),
-    exp: Number(document.getElementById("exp").value),
-    profit: Number(document.getElementById("profit").value),
-    images: imageUrls
-  };
-
-  console.log("🔥 Adding spot:", newSpot);
-
-  await spotsRef.push(newSpot);
-
-  this.reset();
-  document.getElementById("imagePreview").innerHTML = "";
-});
-
-/* IMAGE PREVIEW */
-document.getElementById("images").addEventListener("change", function(){
-  const preview = document.getElementById("imagePreview");
-  preview.innerHTML = "";
-  Array.from(this.files).forEach(file=>{
-    const reader = new FileReader();
-    reader.onload = function(e){
-      const img = document.createElement("img");
-      img.src = e.target.result;
-      preview.appendChild(img);
-    }
-    reader.readAsDataURL(file);
-  });
-});
-
-/* IMAGE MODAL */
-function showImage(src) {
-  const modal = document.getElementById("imageModal");
-  document.getElementById("modalImg").src = src;
-  modal.style.display = "flex";
-}
-document.getElementById("imageModal").onclick = function(){ this.style.display="none"; }
-
-/* PASSWORD LOGIN */
-function checkPassword() {
-  if(document.getElementById("password").value === PASSWORD){
-    document.getElementById("formDiv").style.display = "block";
-    document.getElementById("loginDiv").style.display = "none";
-  } else {
-    alert("Incorrect password");
-  }
-}
-
-/* SORTING */
-function sortTable(key){
-  if(sortState[key] === null) sortState[key] = true;
-  else sortState[key] = !sortState[key];
-
-  const arr = Object.entries(spots).map(([id, s]) => ({id, ...s}));
-  arr.sort((a,b)=> sortState[key] ? a[key]-b[key] : b[key]-a[key]);
-
-  const tbody = document.getElementById("spotsBody");
-  tbody.innerHTML = "";
-  arr.forEach(s=>{
-    if(currentSection !== "All" && s.section !== currentSection) return;
-    const tr = document.createElement("tr");
-    const imagesHTML = (s.images || []).map(i => `<img src="${i}" class="thumb" onclick="showImage('${i}')">`).join("");
-    tr.innerHTML = `
-      <td>${s.spot}</td>
-      <td>${s.level}</td>
-      <td>${s.exp}</td>
-      <td>${s.profit}</td>
-      <td>${imagesHTML}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  ["level","exp","profit"].forEach(h=>{
-    const arrowEl = document.querySelector("#"+h+"Header .arrow");
-    arrowEl.textContent = "";
-    if(h===key) arrowEl.textContent = sortState[key] ? "↑":"↓";
-  });
-}
-["level","exp","profit"].forEach(k=>document.getElementById(k+"Header").onclick=()=>sortTable(k));
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
