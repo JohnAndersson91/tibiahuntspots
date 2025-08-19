@@ -245,19 +245,20 @@ function addSpot(event, sectionId) {
     form.reset();
 }
 
-// Sort table
-function sortTable(tableId, colIndex, isNumeric) {
+function sortTable(tableId, colIndex) {
     const table = document.getElementById(tableId);
-    const rows = Array.from(table.rows).slice(1); // skip header
+    const rows = Array.from(table.rows).slice(1); // skip header row
+
+    // Toggle sort direction
+    if(!table.sortDirection) table.sortDirection = 1; 
+    else table.sortDirection *= -1;
+
     rows.sort((a, b) => {
-        let valA = a.cells[colIndex].innerText;
-        let valB = b.cells[colIndex].innerText;
-        if(isNumeric) {
-            valA = parseFloat(valA) || 0;
-            valB = parseFloat(valB) || 0;
-        }
-        return valA > valB ? 1 : valA < valB ? -1 : 0;
+        const valA = parseFloat(a.cells[colIndex].innerText.replace(/,/g,'')) || 0;
+        const valB = parseFloat(b.cells[colIndex].innerText.replace(/,/g,'')) || 0;
+        return (valA - valB) * table.sortDirection;
     });
+
     rows.forEach(row => table.appendChild(row));
 }
 </script>
