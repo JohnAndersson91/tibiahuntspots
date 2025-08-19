@@ -117,8 +117,8 @@ function renderTables(){
                           : "";
       tr.innerHTML = `<td>${s.spot}</td>
                       <td>${s.level}</td>
-                      <td>${s.exp}</td>
-                      <td>${s.profit}</td>
+                      <td>${s.exp + "k/h"}</td>
+                      <td>${s.profit "k/h"}</td>
                       <td>${imagesHTML}</td>
                       <td>${actionsHTML}</td>`;
       table.appendChild(tr);
