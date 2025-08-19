@@ -41,9 +41,10 @@
   <thead>
     <tr>
       <th onclick="sortTable('spot')">Spot <span id="spotArrow"></span></th>
-      <th onclick="sortTable('level')">Level <span id="levelArrow"></span></th>
-      <th onclick="sortTable('exp')">Raw Exp <span id="expArrow"></span></th>
-      <th onclick="sortTable('profit')">Profit <span id="profitArrow"></span></th>
+      <th onclick="sortTable('levelReq')">Level req <span id="levelArrow"></span></th>
+      <th onclick="sortTable('exp')">Raw Exp k/h <span id="expArrow"></span></th>
+      <th onclick="sortTable('profit')">Profit k/h <span id="profitArrow"></span></th>
+       <th onclick="sortTable('playerLevel')">Profit k/h <span id="profitArrow"></span></th>
     </tr>
   </thead>
   <tbody id="spotsBody"></tbody>
@@ -62,9 +63,10 @@
       <option value="Monk">Monk</option>
       <option value="Duo">Duo</option>
     </select>
-    <input type="number" id="level" placeholder="Level" required>
-    <input type="number" id="exp" placeholder="Raw Exp" required>
-    <input type="number" id="profit" placeholder="Profit" required>
+    <input type="number" id="levelReq" placeholder="Level Req" required>
+    <input type="number" id="exp" placeholder="Raw Exp k/h" required>
+    <input type="number" id="profit" placeholder="Profit k/h" required>
+    <input type="number" id="playerLevel" placeholder="Player Level" required>
     <button type="submit">Add Spot</button>
   </form>
 </div>
@@ -73,8 +75,8 @@
 const PASSWORD = "willchange321"; // change this
 let spots = [
     // static spots
-  { spot: "Dragon Lair", section: "All", level: 50, exp: 20 + "k/h", profit: 5000 },
-  { spot: "Rotworm Cave", section: "All", level: 10, exp: 30000, profit: 1000 }
+  { spot: "Dragon Lair", section: "All", levelReq: 50, exp: 20, profit: 10, playerLevel: 60 },
+  { spot: "Rotworm Cave", section: "All", levelReq: 10, exp: 30, profit: 20, playerLevel: 8 }
 ];
 let currentSection = 'All';
 let sortConfig = { key: null, asc: true };
@@ -87,9 +89,10 @@ function renderTable() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${s.spot}</td>
-      <td>${s.level}</td>
+      <td>${s.levelReq}</td>
       <td>${s.exp}</td>
       <td>${s.profit}</td>
+      <td>${s.playerLevel}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -105,9 +108,10 @@ document.getElementById("addSpotForm").addEventListener("submit", e=>{
   const newSpot = {
     spot: document.getElementById("spotName").value,
     section: document.getElementById("sectionSelect").value,
-    level: Number(document.getElementById("level").value),
+    levelReq: Number(document.getElementById("levelReq").value),
     exp: Number(document.getElementById("exp").value),
     profit: Number(document.getElementById("profit").value),
+    playerLevel: Number(document.getElementById("playerLevel").value),
   };
   spots.push(newSpot);
   renderTable();
