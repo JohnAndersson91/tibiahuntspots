@@ -1,66 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tibia Hunt Spots</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello World</title>
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    h1 {
+      color: #ffcc00;
+    }
+  </style>
 </head>
 <body>
-
-<h1>Tibia Hunt Spots</h1>
-
-<select id="sectionSelector">
-  <option value="All">All Classes</option>
-  <option value="Knight">Knight</option>
-  <option value="Paladin">Paladin</option>
-  <option value="Mages">Mages</option>
-  <option value="Monk">Monk</option>
-  <option value="Duo">Duo</option>
-</select>
-
-<table>
-  <thead>
-    <tr>
-      <th>Spot</th>
-      <th id="levelHeader">Level <span class="arrow"></span></th>
-      <th id="expHeader">Raw Exp <span class="arrow"></span></th>
-      <th id="profitHeader">Profit <span class="arrow"></span></th>
-      <th>Images</th>
-    </tr>
-  </thead>
-  <tbody id="spotsBody"></tbody>
-</table>
-
-<div id="imageModal">
-  <img id="modalImg" src="">
-</div>
-
-<div id="loginDiv">
-  <input type="password" id="password" placeholder="Enter password to manage spots">
-  <button onclick="checkPassword()">Login</button>
-</div>
-
-<div id="formDiv" style="display:none;">
-  <form id="addSpotForm">
-    <input type="text" id="spotName" placeholder="Spot Name" required>
-    <select id="sectionSelect" required>
-      <option value="" disabled selected>Select Class</option>
-      <option value="Knight">Knight</option>
-      <option value="Paladin">Paladin</option>
-      <option value="Mages">Mages</option>
-      <option value="Monk">Monk</option>
-      <option value="Duo">Duo</option>
-    </select>
-    <input type="number" id="level" placeholder="Level" required>
-    <input type="number" id="exp" placeholder="Raw Exp" required>
-    <input type="number" id="profit" placeholder="Profit" required>
-    <input type="file" id="images" multiple accept="image/*">
-    <div id="imagePreview"></div>
-    <button type="submit">Add Spot</button>
-  </form>
-</div>
-
-<script src="script.js"></script>
+  <h1>Hello World!</h1>
 </body>
 </html>
