@@ -238,6 +238,19 @@ function addSpot(event, sectionId) {
 
     form.reset();
 }
+    function sortTable(tableId, colIndex, isNumeric) {
+    const table = document.getElementById(tableId);
+    const rows = Array.from(table.rows).slice(1); // skip header
+    rows.sort((a, b) => {
+        let valA = a.cells[colIndex].innerText;
+        let valB = b.cells[colIndex].innerText;
+        if (isNumeric) {
+            valA = parseFloat(valA.replace(/,/g, '')) || 0;
+            valB = parseFloat(valB.replace(/,/g, '')) || 0;
+        }
+        return valA > valB ? 1 : valA < valB ? -1 : 0;
+    });
+    rows.forEach(row => table.appendChild(row));
 </script>
 
 </body>
