@@ -44,7 +44,8 @@
       <th onclick="sortTable('levelReq')">Level Req <span id="levelArrow"></span></th>
       <th onclick="sortTable('exp')">Raw Exp k/h <span id="expArrow"></span></th>
       <th onclick="sortTable('profit')">Profit k/h <span id="profitArrow"></span></th>
-       <th onclick="sortTable('playerLevel')">Player Level <span id="playerLevelArrow"></span></th>
+      <th onclick="sortTable('playerLevel')">Player Level <span id="playerLevelArrow"></span></th>
+      <th onclick="sortTable('playerSkills')">Player Skills <span id="playerSkillsArrow"></span></th>
     </tr>
   </thead>
   <tbody id="spotsBody"></tbody>
@@ -67,6 +68,7 @@
     <input type="number" id="exp" placeholder="Raw Exp k/h" required>
     <input type="number" id="profit" placeholder="Profit k/h" required>
     <input type="number" id="playerLevel" placeholder="Player Level" required>
+    <input type="text" id="playerSkills" placeholder="Player Skills" required>
     <button type="submit">Add Spot</button>
   </form>
 </div>
@@ -75,8 +77,8 @@
 const PASSWORD = "willchange321"; // change this
 let spots = [
     // static spots
-  { spot: "Dragon Lair", section: "All", levelReq: 50, exp: 20, profit: 10, playerLevel: 60 },
-  { spot: "Rotworm Cave", section: "All", levelReq: 10, exp: 30, profit: 20, playerLevel: 8 }
+  { spot: "Dragon Lair", section: "All", levelReq: 50, exp: 20, profit: 10, playerLevel: 60, playerSkills: 60d 15m },
+  { spot: "Rotworm Cave", section: "All", levelReq: 10, exp: 30, profit: 20, playerLevel: 8, playerSkills: 40s 4m }
 ];
 let currentSection = 'All';
 let sortConfig = { key: null, asc: true };
@@ -93,6 +95,7 @@ function renderTable() {
       <td>${s.exp}</td>
       <td>${s.profit}</td>
       <td>${s.playerLevel}</td>
+      <td>${s.playerSkills}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -112,6 +115,7 @@ document.getElementById("addSpotForm").addEventListener("submit", e=>{
     exp: Number(document.getElementById("exp").value),
     profit: Number(document.getElementById("profit").value),
     playerLevel: Number(document.getElementById("playerLevel").value),
+    playerSkills: document.getElementById("playerSkills").value,
   };
   spots.push(newSpot);
   renderTable();
