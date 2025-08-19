@@ -5,59 +5,78 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tibia Hunt Spots</title>
 <style>
-    body {
-        background-color: #1a1a1a;
-        color: #f0f0f0;
-        font-family: Arial, sans-serif;
-        margin: 0;
-    }
-    nav {
-        background-color: #111;
-        display: flex;
-        justify-content: center;
-        padding: 10px 0;
-    }
-    nav a {
-        color: #f0f0f0;
-        text-decoration: none;
-        margin: 0 15px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: color 0.3s;
-    }
-    nav a:hover {
-        color: #00bfff;
-    }
-    section {
-        display: none; /* Hide all sections initially */
-        padding: 50px 20px;
-        text-align: center;
-    }
-    section.active {
-        display: block; /* Show the active section */
-    }
-    h1 {
-        margin-bottom: 20px;
-    }
-    table {
-        width: 80%;
-        margin: 0 auto;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-    th, td {
-        border: 1px solid #555;
-        padding: 10px;
-    }
-    th {
-        background-color: #222;
-    }
-    tr:nth-child(even) {
-        background-color: #2a2a2a;
-    }
+body {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+nav {
+    background-color: #111;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+nav a {
+    color: #f0f0f0;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+nav a:hover {
+    color: #00bfff;
+}
+section {
+    display: none;
+    padding: 20px;
+    text-align: center;
+}
+section.active {
+    display: block;
+}
+h1 {
+    margin-bottom: 20px;
+}
+table {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+th, td {
+    border: 1px solid #555;
+    padding: 10px;
+}
+th {
+    background-color: #222;
+}
+tr:nth-child(even) {
+    background-color: #2a2a2a;
+}
+tr:hover {
+    background-color: #333;
+}
+img {
+    max-width: 100px;
+    margin: 5px;
+}
+form {
+    margin-bottom: 30px;
+}
+input, select {
+    margin: 5px;
+    padding: 5px;
+}
+button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
 </style>
 </head>
 <body>
+
 <nav>
     <a onclick="showSection('knight')">Knight</a>
     <a onclick="showSection('paladin')">Paladin</a>
@@ -68,130 +87,158 @@
 
 <section id="knight" class="active">
     <h1>Knight Hunting Spots</h1>
-    <table>
+    <form onsubmit="addSpot(event, 'knight')">
+        <input type="text" placeholder="Hunting Spot" name="spot" required>
+        <input type="text" placeholder="Level" name="level" required>
+        <input type="text" placeholder="Raw Exp" name="exp" required>
+        <input type="text" placeholder="Profit" name="profit" required>
+        <input type="file" name="img1" accept="image/*" required>
+        <input type="file" name="img2" accept="image/*" required>
+        <button type="submit">Add Spot</button>
+    </form>
+    <table id="table-knight">
         <tr>
             <th>Hunting Spot</th>
             <th>Level</th>
             <th>Raw Exp</th>
             <th>Profit</th>
-        </tr>
-        <tr>
-            <td>Dragon Lair</td>
-            <td>50-100</td>
-            <td>8000</td>
-            <td>5000 gp</td>
-        </tr>
-        <tr>
-            <td>Orc Camp</td>
-            <td>40-90</td>
-            <td>5000</td>
-            <td>3000 gp</td>
+            <th>Images</th>
         </tr>
     </table>
 </section>
 
 <section id="paladin">
     <h1>Paladin Hunting Spots</h1>
-    <table>
+    <form onsubmit="addSpot(event, 'paladin')">
+        <input type="text" placeholder="Hunting Spot" name="spot" required>
+        <input type="text" placeholder="Level" name="level" required>
+        <input type="text" placeholder="Raw Exp" name="exp" required>
+        <input type="text" placeholder="Profit" name="profit" required>
+        <input type="file" name="img1" accept="image/*" required>
+        <input type="file" name="img2" accept="image/*" required>
+        <button type="submit">Add Spot</button>
+    </form>
+    <table id="table-paladin">
         <tr>
             <th>Hunting Spot</th>
             <th>Level</th>
             <th>Raw Exp</th>
             <th>Profit</th>
-        </tr>
-        <tr>
-            <td>Hydra Cave</td>
-            <td>50-100</td>
-            <td>7500</td>
-            <td>4500 gp</td>
-        </tr>
-        <tr>
-            <td>Sea Serpent Lair</td>
-            <td>60-110</td>
-            <td>9000</td>
-            <td>6000 gp</td>
+            <th>Images</th>
         </tr>
     </table>
 </section>
 
 <section id="mages">
     <h1>Mages Hunting Spots</h1>
-    <table>
+    <form onsubmit="addSpot(event, 'mages')">
+        <input type="text" placeholder="Hunting Spot" name="spot" required>
+        <input type="text" placeholder="Level" name="level" required>
+        <input type="text" placeholder="Raw Exp" name="exp" required>
+        <input type="text" placeholder="Profit" name="profit" required>
+        <input type="file" name="img1" accept="image/*" required>
+        <input type="file" name="img2" accept="image/*" required>
+        <button type="submit">Add Spot</button>
+    </form>
+    <table id="table-mages">
         <tr>
             <th>Hunting Spot</th>
             <th>Level</th>
             <th>Raw Exp</th>
             <th>Profit</th>
-        </tr>
-        <tr>
-            <td>Demon Cave</td>
-            <td>60-120</td>
-            <td>10000</td>
-            <td>7000 gp</td>
-        </tr>
-        <tr>
-            <td>Lizard City</td>
-            <td>55-110</td>
-            <td>8500</td>
-            <td>5000 gp</td>
+            <th>Images</th>
         </tr>
     </table>
 </section>
 
 <section id="monk">
     <h1>Monk Hunting Spots</h1>
-    <table>
+    <form onsubmit="addSpot(event, 'monk')">
+        <input type="text" placeholder="Hunting Spot" name="spot" required>
+        <input type="text" placeholder="Level" name="level" required>
+        <input type="text" placeholder="Raw Exp" name="exp" required>
+        <input type="text" placeholder="Profit" name="profit" required>
+        <input type="file" name="img1" accept="image/*" required>
+        <input type="file" name="img2" accept="image/*" required>
+        <button type="submit">Add Spot</button>
+    </form>
+    <table id="table-monk">
         <tr>
             <th>Hunting Spot</th>
             <th>Level</th>
             <th>Raw Exp</th>
             <th>Profit</th>
-        </tr>
-        <tr>
-            <td>Orc Fortress</td>
-            <td>45-90</td>
-            <td>6000</td>
-            <td>3500 gp</td>
-        </tr>
-        <tr>
-            <td>Goblin Camp</td>
-            <td>40-80</td>
-            <td>4000</td>
-            <td>2500 gp</td>
+            <th>Images</th>
         </tr>
     </table>
 </section>
 
 <section id="duo">
     <h1>Duo Hunting Spots</h1>
-    <table>
+    <form onsubmit="addSpot(event, 'duo')">
+        <input type="text" placeholder="Hunting Spot" name="spot" required>
+        <input type="text" placeholder="Level" name="level" required>
+        <input type="text" placeholder="Raw Exp" name="exp" required>
+        <input type="text" placeholder="Profit" name="profit" required>
+        <input type="file" name="img1" accept="image/*" required>
+        <input type="file" name="img2" accept="image/*" required>
+        <button type="submit">Add Spot</button>
+    </form>
+    <table id="table-duo">
         <tr>
             <th>Hunting Spot</th>
             <th>Level</th>
             <th>Raw Exp</th>
             <th>Profit</th>
-        </tr>
-        <tr>
-            <td>Troll Cave</td>
-            <td>50-100</td>
-            <td>8000</td>
-            <td>5000 gp</td>
-        </tr>
-        <tr>
-            <td>Minotaur Maze</td>
-            <td>55-105</td>
-            <td>9000</td>
-            <td>5500 gp</td>
+            <th>Images</th>
         </tr>
     </table>
 </section>
 
 <script>
 function showSection(id) {
-    const sections = document.querySelectorAll('section');
-    sections.forEach(sec => sec.classList.remove('active'));
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
 }
+
+function addSpot(event, sectionId) {
+    event.preventDefault();
+    const form = event.target;
+    const table = document.getElementById('table-' + sectionId);
+
+    const spot = form.spot.value;
+    const level = form.level.value;
+    const exp = form.exp.value;
+    const profit = form.profit.value;
+
+    const img1 = form.img1.files[0];
+    const img2 = form.img2.files[0];
+
+    const reader1 = new FileReader();
+    const reader2 = new FileReader();
+
+    reader1.onload = () => {
+        reader2.onload = () => {
+            const row = table.insertRow();
+            row.insertCell(0).innerText = spot;
+            row.insertCell(1).innerText = level;
+            row.insertCell(2).innerText = exp;
+            row.insertCell(3).innerText = profit;
+            const cell = row.insertCell(4);
+            const image1 = document.createElement('img');
+            image1.src = reader1.result;
+            const image2 = document.createElement('img');
+            image2.src = reader2.result;
+            cell.appendChild(image1);
+            cell.appendChild(image2);
+        }
+        reader2.readAsDataURL(img2);
+    }
+    reader1.readAsDataURL(img1);
+
+    form.reset();
+}
 </script>
+
 </body>
 </html>
