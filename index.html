@@ -29,7 +29,8 @@
   <span id="loginMsg" style="margin-left:10px;"></span>
 </div>
 
-<div id="mainContent" style="display:none;">
+<!-- This part is always visible -->
+<div id="mainContent">
   <!-- Section Selector -->
   <select id="sectionSelector">
     <option value="All">All Classes</option>
@@ -55,8 +56,8 @@
     <tbody id="spotsBody"></tbody>
   </table>
 
-  <!-- Add Spot Form -->
-  <div id="formDiv">
+  <!-- Add Spot Form (hidden if not logged in) -->
+  <div id="formDiv" style="display:none;">
     <form id="addSpotForm">
       <input type="text" id="spotName" placeholder="Spot Name" required>
       <select id="sectionSelect" required>
@@ -83,8 +84,8 @@ let currentSection = 'All';
 let sortState = {level:null, exp:null, profit:null}; 
 let loggedIn = false;
 
-// Simple login (hardcoded for demo)
-const user = {username:"admin", password:"1234"};
+// Simple login
+const user = {username:"admin", password:"willchange123"};
 const loginBtn = document.getElementById("loginBtn");
 loginBtn.addEventListener("click", ()=>{
   const u = document.getElementById("username").value;
@@ -92,7 +93,8 @@ loginBtn.addEventListener("click", ()=>{
   if(u===user.username && p===user.password){
     loggedIn = true;
     document.getElementById("loginDiv").style.display = "none";
-    document.getElementById("mainContent").style.display = "block";
+    document.getElementById("formDiv").style.display = "block"; // show add form
+    renderTable();
   } else {
     document.getElementById("loginMsg").textContent = "Invalid login!";
   }
