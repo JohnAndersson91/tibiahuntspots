@@ -47,21 +47,6 @@
     </tr>
   </thead>
   <tbody id="spotsBody"></tbody>
-      <!-- 🔽 Add your static rows here -->
-    <tr>
-      <td>Dragon Lair</td>
-      <td>50</td>
-      <td>200000</td>
-      <td>5000</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Rotworm Cave</td>
-      <td>10</td>
-      <td>30000</td>
-      <td>1000</td>
-      <td></td>
-    </tr>
   </tbody>
 </table>
 
@@ -86,7 +71,11 @@
 
 <script>
 const PASSWORD = "willchange321"; // change this
-let spots = [];
+let spots = [
+    // static spots
+  { spot: "Dragon Lair", section: "All", level: 50, exp: 200000, profit: 5000 },
+  { spot: "Rotworm Cave", section: "All", level: 10, exp: 30000, profit: 1000 }
+];
 let currentSection = 'All';
 let sortConfig = { key: null, asc: true };
 
