@@ -10,30 +10,31 @@
         color: #f0f0f0;
         font-family: Arial, sans-serif;
         margin: 0;
-        scroll-behavior: smooth;
     }
     nav {
         background-color: #111;
         display: flex;
         justify-content: center;
         padding: 10px 0;
-        position: sticky;
-        top: 0;
     }
     nav a {
         color: #f0f0f0;
         text-decoration: none;
         margin: 0 15px;
         font-weight: bold;
+        cursor: pointer;
         transition: color 0.3s;
     }
     nav a:hover {
         color: #00bfff;
     }
     section {
+        display: none; /* Hide all sections initially */
         padding: 100px 20px;
         text-align: center;
-        border-bottom: 1px solid #333;
+    }
+    section.active {
+        display: block; /* Show the active section */
     }
     h1 {
         margin-bottom: 20px;
@@ -42,14 +43,14 @@
 </head>
 <body>
 <nav>
-    <a href="#knight">Knight</a>
-    <a href="#paladin">Paladin</a>
-    <a href="#mages">Mages</a>
-    <a href="#monk">Monk</a>
-    <a href="#duo">Duo</a>
+    <a onclick="showSection('knight')">Knight</a>
+    <a onclick="showSection('paladin')">Paladin</a>
+    <a onclick="showSection('mages')">Mages</a>
+    <a onclick="showSection('monk')">Monk</a>
+    <a onclick="showSection('duo')">Duo</a>
 </nav>
 
-<section id="knight">
+<section id="knight" class="active">
     <h1>Knight Hunting Spots</h1>
     <p>Discover the top hunting locations for Knights.</p>
 </section>
@@ -73,5 +74,13 @@
     <h1>Duo Hunting Spots</h1>
     <p>Explore the best hunting spots for duo teams.</p>
 </section>
+
+<script>
+function showSection(id) {
+    const sections = document.querySelectorAll('section');
+    sections.forEach(sec => sec.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+</script>
 </body>
 </html>
