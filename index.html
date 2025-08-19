@@ -30,7 +30,7 @@
     }
     section {
         display: none; /* Hide all sections initially */
-        padding: 100px 20px;
+        padding: 50px 20px;
         text-align: center;
     }
     section.active {
@@ -38,6 +38,22 @@
     }
     h1 {
         margin-bottom: 20px;
+    }
+    table {
+        width: 80%;
+        margin: 0 auto;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th, td {
+        border: 1px solid #555;
+        padding: 10px;
+    }
+    th {
+        background-color: #222;
+    }
+    tr:nth-child(even) {
+        background-color: #2a2a2a;
     }
 </style>
 </head>
@@ -52,27 +68,122 @@
 
 <section id="knight" class="active">
     <h1>Knight Hunting Spots</h1>
-    <p>Discover the top hunting locations for Knights.</p>
+    <table>
+        <tr>
+            <th>Hunting Spot</th>
+            <th>Level</th>
+            <th>Raw Exp</th>
+            <th>Profit</th>
+        </tr>
+        <tr>
+            <td>Dragon Lair</td>
+            <td>50-100</td>
+            <td>8000</td>
+            <td>5000 gp</td>
+        </tr>
+        <tr>
+            <td>Orc Camp</td>
+            <td>40-90</td>
+            <td>5000</td>
+            <td>3000 gp</td>
+        </tr>
+    </table>
 </section>
 
 <section id="paladin">
     <h1>Paladin Hunting Spots</h1>
-    <p>Check out the best hunting locations for Paladins.</p>
+    <table>
+        <tr>
+            <th>Hunting Spot</th>
+            <th>Level</th>
+            <th>Raw Exp</th>
+            <th>Profit</th>
+        </tr>
+        <tr>
+            <td>Hydra Cave</td>
+            <td>50-100</td>
+            <td>7500</td>
+            <td>4500 gp</td>
+        </tr>
+        <tr>
+            <td>Sea Serpent Lair</td>
+            <td>60-110</td>
+            <td>9000</td>
+            <td>6000 gp</td>
+        </tr>
+    </table>
 </section>
 
 <section id="mages">
     <h1>Mages Hunting Spots</h1>
-    <p>Explore the best hunting areas for Mages.</p>
+    <table>
+        <tr>
+            <th>Hunting Spot</th>
+            <th>Level</th>
+            <th>Raw Exp</th>
+            <th>Profit</th>
+        </tr>
+        <tr>
+            <td>Demon Cave</td>
+            <td>60-120</td>
+            <td>10000</td>
+            <td>7000 gp</td>
+        </tr>
+        <tr>
+            <td>Lizard City</td>
+            <td>55-110</td>
+            <td>8500</td>
+            <td>5000 gp</td>
+        </tr>
+    </table>
 </section>
 
 <section id="monk">
     <h1>Monk Hunting Spots</h1>
-    <p>Learn the top hunting spots for Monks.</p>
+    <table>
+        <tr>
+            <th>Hunting Spot</th>
+            <th>Level</th>
+            <th>Raw Exp</th>
+            <th>Profit</th>
+        </tr>
+        <tr>
+            <td>Orc Fortress</td>
+            <td>45-90</td>
+            <td>6000</td>
+            <td>3500 gp</td>
+        </tr>
+        <tr>
+            <td>Goblin Camp</td>
+            <td>40-80</td>
+            <td>4000</td>
+            <td>2500 gp</td>
+        </tr>
+    </table>
 </section>
 
 <section id="duo">
     <h1>Duo Hunting Spots</h1>
-    <p>Explore the best hunting spots for duo teams.</p>
+    <table>
+        <tr>
+            <th>Hunting Spot</th>
+            <th>Level</th>
+            <th>Raw Exp</th>
+            <th>Profit</th>
+        </tr>
+        <tr>
+            <td>Troll Cave</td>
+            <td>50-100</td>
+            <td>8000</td>
+            <td>5000 gp</td>
+        </tr>
+        <tr>
+            <td>Minotaur Maze</td>
+            <td>55-105</td>
+            <td>9000</td>
+            <td>5500 gp</td>
+        </tr>
+    </table>
 </section>
 
 <script>
