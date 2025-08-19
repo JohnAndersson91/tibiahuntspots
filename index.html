@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tibia Hunt Spots</title>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
   body { background:#1e1e1e; color:#f0f0f0; font-family:sans-serif; padding:20px; }
   table { width:100%; border-collapse: collapse; margin-top:20px; }
@@ -21,7 +19,6 @@
   input, button, select { padding:5px; border-radius:4px; border:none; }
   button { cursor:pointer; background:#555; color:#fff; }
   #backupBtn, #loadBackupBtn { margin-top:10px; }
-  .highlight { background:#333366; }
 </style>
 </head>
 <body>
@@ -89,43 +86,45 @@
   <button id="loadBackupBtn">Load Backup</button>
 </div>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script> <!-- 🔥 CHANGED -->
+
 <script>
-/* FIREBASE INIT */
+/* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyBkmHIc3xwSz4zoNX1R3OxCPfcoSYUyfB4",
   authDomain: "tibiahuntspots.firebaseapp.com",
-  databaseURL: "https://tibiahuntspots-default-rtdb.firebaseio.com/",
+  databaseURL: "https://tibiahuntspots-default-rtdb.firebaseio.com/", // 🔥 CHANGED
   projectId: "tibiahuntspots",
-  storageBucket: "tibiahuntspots.appspot.com",
+  storageBucket: "tibiahuntspots.appspot.com", // 🔥 CHANGED
   messagingSenderId: "1095180317117",
   appId: "1:1095180317117:web:57bd4d2cf8b22edec4a2d4"
 };
 firebase.initializeApp(firebaseConfig);
+
 const db = firebase.database();
-const spotsRef = db.ref('spots');
+const storage = firebase.storage(); // 🔥 CHANGED
+const spotsRef = db.ref("spots");
 
 let spots = {};
-let currentSection = 'All';
+let currentSection = "All";
 let sortState = {level:null, exp:null, profit:null};
-const PASSWORD = "willchange321"; // change this
+const PASSWORD = "willchange321";
 
+/* Load spots */
 const tbody = document.getElementById("spotsBody");
-
-/* LOAD FROM FIREBASE */
 spotsRef.on("value", snapshot => {
   spots = snapshot.val() || {};
   renderFirebaseTable();
 });
 
-/* RENDER TABLE */
-function renderFirebaseTable(sortedKeys = null) {
+function renderFirebaseTable() {
   tbody.innerHTML = "";
-  let keys = Object.keys(spots);
-  if (sortedKeys) keys = sortedKeys;
-
-  keys.forEach(key => {
+  Object.keys(spots).forEach(key => {
     const s = spots[key];
-    if(currentSection !== 'All' && s.section !== currentSection) return;
+    if(currentSection !== "All" && s.section !== currentSection) return;
 
     const tr = document.createElement("tr");
     const imagesHTML = (s.images || []).map(i => `<img src="${i}" class="thumb" onclick="showImage('${i}')">`).join("");
@@ -137,31 +136,39 @@ function renderFirebaseTable(sortedKeys = null) {
       <td>${s.profit}</td>
       <td>${imagesHTML}</td>
     `;
-
-    tr.classList.add("highlight");
-    setTimeout(() => tr.classList.remove("highlight"), 2000);
-
     tbody.appendChild(tr);
   });
 }
 
-/* IMAGE MODAL */
+/* Image modal */
 function showImage(src) {
-  const modal = document.getElementById("imageModal");
   document.getElementById("modalImg").src = src;
-  modal.style.display = "flex";
+  document.getElementById("imageModal").style.display = "flex";
 }
 document.getElementById("imageModal").onclick = function(){ this.style.display="none"; }
 
-/* SORTING */
+/* Sorting */
 function sortTable(key){
   if(sortState[key] === null) sortState[key] = true;
   else sortState[key] = !sortState[key];
 
-  let sortedKeys = Object.keys(spots).sort((a,b)=>{
-    const A = spots[a][key];
-    const B = spots[b][key];
-    return sortState[key] ? A - B : B - A;
+  const sorted = Object.entries(spots).sort(([,a],[,b])=>{
+    return sortState[key] ? a[key]-b[key] : b[key]-a[key];
+  });
+
+  tbody.innerHTML = "";
+  sorted.forEach(([id,s])=>{
+    if(currentSection !== "All" && s.section !== currentSection) return;
+    const tr = document.createElement("tr");
+    const imagesHTML = (s.images || []).map(i => `<img src="${i}" class="thumb" onclick="showImage('${i}')">`).join("");
+    tr.innerHTML = `
+      <td>${s.spot}</td>
+      <td>${s.level}</td>
+      <td>${s.exp}</td>
+      <td>${s.profit}</td>
+      <td>${imagesHTML}</td>
+    `;
+    tbody.appendChild(tr);
   });
 
   ['level','exp','profit'].forEach(h=>{
@@ -169,12 +176,10 @@ function sortTable(key){
     arrowEl.textContent = "";
     if(h===key) arrowEl.textContent = sortState[key] ? "↑":"↓";
   });
-
-  renderFirebaseTable(sortedKeys);
 }
 ['level','exp','profit'].forEach(k=>document.getElementById(k+'Header').onclick=()=>sortTable(k));
 
-/* PASSWORD LOGIN */
+/* Password login */
 function checkPassword() {
   if(document.getElementById("password").value === PASSWORD){
     document.getElementById("formDiv").style.display = "block";
@@ -184,7 +189,7 @@ function checkPassword() {
   }
 }
 
-/* IMAGE PREVIEW */
+/* Image preview */
 document.getElementById("images").addEventListener("change", function(){
   const preview = document.getElementById("imagePreview");
   preview.innerHTML = "";
@@ -199,11 +204,19 @@ document.getElementById("images").addEventListener("change", function(){
   });
 });
 
-/* ADD SPOT TO FIREBASE */
-document.getElementById("addSpotForm").addEventListener("submit", function(e){
+/* 🔥 Upload images + save spot */
+document.getElementById("addSpotForm").addEventListener("submit", async function(e){
   e.preventDefault();
+
   const files = document.getElementById("images").files;
-  const imagesArray = Array.from(files).map(f => URL.createObjectURL(f));
+  let imageUrls = [];
+
+  for (let file of files) {
+    const storageRef = storage.ref("spots/" + Date.now() + "-" + file.name);
+    await storageRef.put(file);
+    const url = await storageRef.getDownloadURL();
+    imageUrls.push(url);
+  }
 
   const newSpot = {
     spot: document.getElementById("spotName").value,
@@ -211,53 +224,12 @@ document.getElementById("addSpotForm").addEventListener("submit", function(e){
     level: Number(document.getElementById("level").value),
     exp: Number(document.getElementById("exp").value),
     profit: Number(document.getElementById("profit").value),
-    images: imagesArray
+    images: imageUrls
   };
 
   spotsRef.push(newSpot);
   this.reset();
   document.getElementById("imagePreview").innerHTML = "";
-});
-
-/* BACKUP */
-document.getElementById("backupBtn").addEventListener("click", ()=>{
-  const dataStr = JSON.stringify(spots, null, 2);
-  const blob = new Blob([dataStr], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "tibia_hunt_spots_backup.json";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-});
-
-/* LOAD BACKUP */
-document.getElementById("loadBackupBtn").addEventListener("click", ()=>{
-  const fileInput = document.getElementById("loadBackupInput");
-  if(fileInput.files.length === 0){
-    alert("Please select a JSON backup file first.");
-    return;
-  }
-  const file = fileInput.files[0];
-  const reader = new FileReader();
-  reader.onload = function(e){
-    try {
-      const loadedSpots = JSON.parse(e.target.result);
-      spotsRef.set(loadedSpots);
-      alert("Backup loaded successfully!");
-    } catch(err){
-      alert("Error reading backup: " + err);
-    }
-  };
-  reader.readAsText(file);
-});
-
-/* FILTER BY SECTION */
-document.getElementById("sectionSelector").addEventListener("change", (e)=>{
-  currentSection = e.target.value;
-  renderFirebaseTable();
 });
 </script>
 
