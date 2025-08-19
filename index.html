@@ -9,6 +9,7 @@
   table { width:100%; border-collapse: collapse; margin-top:20px; }
   th, td { border:1px solid #444; padding:8px; text-align:left; }
   th { cursor:pointer; user-select:none; }
+  th .arrow { font-size:0.8em; margin-left:5px; color:#ffcc00; }
   #imageModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
     background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
   #imageModal img { max-width:90%; max-height:90%; }
@@ -26,7 +27,7 @@
 
 <!-- Section Selector -->
 <select id="sectionSelector">
-  <option value="All">All Sections</option>
+  <option value="All">All Classes</option>
   <option value="Knight">Knight</option>
   <option value="Paladin">Paladin</option>
   <option value="Mages">Mages</option>
@@ -39,10 +40,9 @@
   <thead>
     <tr>
       <th>Spot</th>
-      <th>Section</th>
-      <th id="levelHeader">Level</th>
-      <th id="expHeader">Raw Exp</th>
-      <th id="profitHeader">Profit</th>
+      <th id="levelHeader">Level <span class="arrow"></span></th>
+      <th id="expHeader">Raw Exp <span class="arrow"></span></th>
+      <th id="profitHeader">Profit <span class="arrow"></span></th>
       <th>Images</th>
     </tr>
   </thead>
@@ -64,7 +64,14 @@
 <div id="formDiv" style="display:none;">
   <form id="addSpotForm">
     <input type="text" id="spotName" placeholder="Spot Name" required>
-    <input type="text" id="section" placeholder="Section" required>
+    <select id="sectionSelect" required>
+      <option value="" disabled selected>Select Class</option>
+      <option value="Knight">Knight</option>
+      <option value="Paladin">Paladin</option>
+      <option value="Mages">Mages</option>
+      <option value="Monk">Monk</option>
+      <option value="Duo">Duo</option>
+    </select>
     <input type="number" id="level" placeholder="Level" required>
     <input type="number" id="exp" placeholder="Raw Exp" required>
     <input type="number" id="profit" placeholder="Profit" required>
@@ -82,7 +89,7 @@
 <script>
 let spots = [];
 let currentSection = 'All';
-let sortDirection = {level:true, exp:true, profit:true};
+let sortState = {level:null, exp:null, profit:null}; // null=unsorted, true=asc, false=desc
 const PASSWORD = "willchange321"; // change this
 
 // Section filter
@@ -100,7 +107,6 @@ function renderTable() {
     const imagesHTML = s.images.map(i => `<img src="${i}" class="thumb" onclick="showImage('${i}')">`).join("");
     tr.innerHTML = `
       <td>${s.spot}</td>
-      <td>${s.section}</td>
       <td>${s.level}${s.suffix || ""}</td>
       <td>${s.exp}</td>
       <td>${s.profit}</td>
@@ -120,15 +126,21 @@ document.getElementById("imageModal").onclick = function(){ this.style.display="
 
 // Sorting
 function sortTable(key){
-  spots.sort((a,b)=>sortDirection[key]?a[key]-b[key]:b[key]-a[key]);
-  sortDirection[key] = !sortDirection[key];
-  // Reset headers
-  ['level','exp','profit'].forEach(h=>{
-    document.getElementById(h+'Header').innerHTML = h.charAt(0).toUpperCase()+h.slice(1);
+  // Toggle direction
+  if(sortState[key] === null) sortState[key] = true;
+  else sortState[key] = !sortState[key];
+
+  spots.sort((a,b)=>{
+    return sortState[key] ? a[key]-b[key] : b[key]-a[key];
   });
-  // Add arrow
-  const arrow = sortDirection[key] ? " ↑":" ↓";
-  document.getElementById(key+'Header').innerHTML += arrow;
+
+  // Update headers arrows
+  ['level','exp','profit'].forEach(h=>{
+    const arrowEl = document.querySelector("#"+h+"Header .arrow");
+    arrowEl.textContent = "";
+    if(h===key) arrowEl.textContent = sortState[key] ? "↑":"↓";
+  });
+
   renderTable();
 }
 ['level','exp','profit'].forEach(k=>document.getElementById(k+'Header').onclick=()=>sortTable(k));
@@ -165,7 +177,7 @@ document.getElementById("addSpotForm").addEventListener("submit", function(e){
   const imagesArray = Array.from(files).map(f => URL.createObjectURL(f));
   spots.push({
     spot: document.getElementById("spotName").value,
-    section: document.getElementById("section").value,
+    section: document.getElementById("sectionSelect").value,
     level: Number(document.getElementById("level").value),
     exp: Number(document.getElementById("exp").value),
     profit: Number(document.getElementById("profit").value),
