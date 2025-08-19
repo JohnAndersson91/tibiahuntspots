@@ -13,7 +13,7 @@
   .tab { cursor: pointer; display: inline-block; padding: 10px; background: #333; margin-right: 5px; border-radius: 5px; }
   .tab.active { background: #555; }
   #manage { margin-top: 20px; padding: 10px; border: 1px solid #555; display: none; }
-  input, button { margin: 5px 0; padding: 5px; }
+  input, button, select { margin: 5px 0; padding: 5px; }
 </style>
 </head>
 <body>
@@ -50,19 +50,18 @@
     <input type="number" id="newLevel" placeholder="Level">
     <input type="number" id="newExp" placeholder="Raw Exp">
     <input type="number" id="newProfit" placeholder="Profit">
-    <input type="text" id="newImage1" placeholder="Image1 filename">
-    <input type="text" id="newImage2" placeholder="Image2 filename">
+    <input type="file" id="newImage1" accept="image/*">
+    <input type="file" id="newImage2" accept="image/*">
     <button onclick="addSpot()">Add Spot</button>
   </div>
 </div>
 
 <script>
-const PASSWORD = "willchange321"; // change your password here
+const PASSWORD = "mypassword123"; // Change your password here
 
 const SECTIONS = ["knight","paladin","mage","monk","duo"];
 let activeSection = "knight";
 
-// Example data
 let data = {
   knight: [],
   paladin: [],
@@ -71,7 +70,7 @@ let data = {
   duo: []
 };
 
-// Render tabs
+// Tabs
 const tabsDiv = document.getElementById("tabs");
 SECTIONS.forEach(sec=>{
   const tab = document.createElement("div");
@@ -90,20 +89,28 @@ function renderTables(){
     const sectionData = data[sec];
     const table = document.createElement("table");
     const th = document.createElement("tr");
-    ["Hunting Spot","Level","Raw Exp","Profit","Images"].forEach((h,i)=>{
+    ["Hunting Spot","Level","Raw Exp","Profit","Images","Actions"].forEach((h,i)=>{
       const thElem = document.createElement("th");
       thElem.textContent = h;
-      if(i>0) thElem.onclick = ()=>sortSection(sec,h.toLowerCase().replace(" ",""));
+      if(i>0 && i<4) thElem.onclick = ()=>sortSection(sec,h.toLowerCase().replace(" ",""));
       th.appendChild(thElem);
     });
     table.appendChild(th);
-    sectionData.forEach(s=>{
+    sectionData.forEach((s,index)=>{
       const tr = document.createElement("tr");
+      const imagesHTML = s.images.map(img=>{
+        if(img) return `<img src="${img}" width="50">`; 
+        else return "";
+      }).join("");
+      const actionsHTML = document.getElementById("manage").style.display === "block" 
+                          ? `<button onclick="removeSpot('${sec}',${index})">Remove</button>` 
+                          : "";
       tr.innerHTML = `<td>${s.spot}</td>
                       <td>${s.level}</td>
                       <td>${s.exp}</td>
                       <td>${s.profit}</td>
-                      <td>${s.images.map(img=>`<img src="images/${img}" width="50">`).join("")}</td>`;
+                      <td>${imagesHTML}</td>
+                      <td>${actionsHTML}</td>`;
       table.appendChild(tr);
     });
     const header = document.createElement("h2");
@@ -125,13 +132,39 @@ function sortSection(section,key){
 function addSpot(){
   const sec = document.getElementById("newSection").value;
   const spot = document.getElementById("newSpot").value;
+  if(!spot) { alert("Spot name is required"); return; }
   const level = parseInt(document.getElementById("newLevel").value)||0;
   const exp = parseInt(document.getElementById("newExp").value)||0;
   const profit = parseInt(document.getElementById("newProfit").value)||0;
-  const img1 = document.getElementById("newImage1").value;
-  const img2 = document.getElementById("newImage2").value;
-  data[sec].push({spot,level,exp,profit,images:[img1,img2]});
+
+  // Handle optional images
+  const img1File = document.getElementById("newImage1").files[0];
+  const img2File = document.getElementById("newImage2").files[0];
+
+  let images = [];
+  if(img1File) images.push(URL.createObjectURL(img1File));
+  else images.push("");
+  if(img2File) images.push(URL.createObjectURL(img2File));
+  else images.push("");
+
+  data[sec].push({spot,level,exp,profit,images});
   renderTables();
+
+  // Clear input fields
+  document.getElementById("newSpot").value="";
+  document.getElementById("newLevel").value="";
+  document.getElementById("newExp").value="";
+  document.getElementById("newProfit").value="";
+  document.getElementById("newImage1").value="";
+  document.getElementById("newImage2").value="";
+}
+
+// Remove spot
+function removeSpot(section,index){
+  if(confirm("Are you sure you want to remove this spot?")){
+    data[section].splice(index,1);
+    renderTables();
+  }
 }
 
 // Password check
@@ -140,6 +173,7 @@ function checkPassword(){
   if(input === PASSWORD){
     document.getElementById("manage").style.display = "block";
     document.getElementById("login").style.display = "none";
+    renderTables(); // show remove buttons
   } else {
     alert("Incorrect password");
   }
