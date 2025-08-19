@@ -1,100 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Tibia Hunt Spots</title>
-  <style>
-    body { background-color: #1e1e1e; color: #eee; font-family: sans-serif; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #555; padding: 8px; text-align: left; }
-    th { cursor: pointer; }
-    input, button { margin: 5px; }
-    img { max-width: 100px; max-height: 100px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tibia Hunt Spots</title>
+<style>
+  body { background:#1e1e1e; color:#f0f0f0; font-family:sans-serif; padding:20px; }
+  table { width:100%; border-collapse: collapse; margin-top:20px; }
+  th, td { border:1px solid #444; padding:8px; text-align:left; }
+  th { cursor:pointer; user-select:none; }
+  #imageModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+    background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
+  #imageModal img { max-width:90%; max-height:90%; }
+  img.thumb { max-width:50px; max-height:50px; margin:2px; cursor:pointer; }
+  #imagePreview img { max-width:50px; max-height:50px; margin:2px; }
+  #addSpotForm { margin-top:20px; display:flex; flex-direction:column; gap:5px; }
+  input, button, select { padding:5px; border-radius:4px; border:none; }
+  button { cursor:pointer; background:#555; color:#fff; }
+  #backupBtn, #loadBackupBtn { margin-top:10px; }
+</style>
 </head>
 <body>
 
 <h1>Tibia Hunt Spots</h1>
 
-<!-- Table visible to everyone -->
-<table id="spotsTable">
+<!-- Section Selector -->
+<select id="sectionSelector">
+  <option value="All">All Sections</option>
+  <option value="Knight">Knight</option>
+  <option value="Paladin">Paladin</option>
+  <option value="Mages">Mages</option>
+  <option value="Monk">Monk</option>
+  <option value="Duo">Duo</option>
+</select>
+
+<!-- Spots Table -->
+<table>
   <thead>
     <tr>
       <th>Spot</th>
-      <th onclick="sortTable('level')">Level &#x25B2;&#x25BC;</th>
-      <th onclick="sortTable('exp')">Raw Exp &#x25B2;&#x25BC;</th>
-      <th onclick="sortTable('profit')">Profit &#x25B2;&#x25BC;</th>
+      <th>Section</th>
+      <th id="levelHeader">Level</th>
+      <th id="expHeader">Raw Exp</th>
+      <th id="profitHeader">Profit</th>
       <th>Images</th>
     </tr>
   </thead>
   <tbody id="spotsBody"></tbody>
 </table>
 
-<!-- Admin panel only visible after login -->
-<div id="adminPanel" style="display:none;">
-  <h2>Manage Spots</h2>
-  <input id="spotName" placeholder="Spot Name">
-  <input id="level" placeholder="Level">
-  <input id="suffix" placeholder="Suffix (optional)">
-  <input id="exp" placeholder="Raw Exp">
-  <input id="profit" placeholder="Profit">
-  <input type="file" id="image1">
-  <input type="file" id="image2">
-  <button onclick="addSpot()">Add Spot</button>
-
-  <h3>Backup / Restore</h3>
-  <button onclick="downloadBackup()">Download Backup</button>
-  <input type="file" id="restoreFile" onchange="restoreBackup(event)">
+<!-- Image Modal -->
+<div id="imageModal">
+  <img id="modalImg" src="">
 </div>
 
-<!-- Login form -->
-<div id="loginForm">
-  <input type="password" id="passwordInput" placeholder="Enter password">
-  <button onclick="login()">Login</button>
+<!-- Password -->
+<div id="loginDiv">
+  <input type="password" id="password" placeholder="Enter password to manage spots">
+  <button onclick="checkPassword()">Login</button>
+</div>
+
+<!-- Add Spot Form -->
+<div id="formDiv" style="display:none;">
+  <form id="addSpotForm">
+    <input type="text" id="spotName" placeholder="Spot Name" required>
+    <input type="text" id="section" placeholder="Section" required>
+    <input type="number" id="level" placeholder="Level" required>
+    <input type="number" id="exp" placeholder="Raw Exp" required>
+    <input type="number" id="profit" placeholder="Profit" required>
+    <input type="file" id="images" multiple accept="image/*">
+    <div id="imagePreview"></div>
+    <button type="submit">Add Spot</button>
+  </form>
+
+  <!-- Backup and Load -->
+  <button id="backupBtn">Save Backup</button>
+  <input type="file" id="loadBackupInput" accept=".json">
+  <button id="loadBackupBtn">Load Backup</button>
 </div>
 
 <script>
-const PASSWORD = "willchange321"; // change this to your desired password
 let spots = [];
-let sortDirection = { level: true, exp: true, profit: true };
+let currentSection = 'All';
+let sortDirection = {level:true, exp:true, profit:true};
+const PASSWORD = "willchange321"; // change this
 
-// Login function
-function login() {
-  const entered = document.getElementById("passwordInput").value;
-  if (entered === PASSWORD) {
-    document.getElementById("adminPanel").style.display = "block";
-    document.getElementById("loginForm").style.display = "none";
-  } else {
-    alert("Wrong password!");
-  }
-}
-
-// Add spot
-function addSpot() {
-  const name = document.getElementById("spotName").value;
-  const level = parseInt(document.getElementById("level").value);
-  const suffix = document.getElementById("suffix").value;
-  const exp = parseInt(document.getElementById("exp").value);
-  const profit = parseInt(document.getElementById("profit").value);
-
-  const images = [];
-  const img1 = document.getElementById("image1").files[0];
-  const img2 = document.getElementById("image2").files[0];
-  if(img1) images.push(URL.createObjectURL(img1));
-  if(img2) images.push(URL.createObjectURL(img2));
-
-  spots.push({ spot: name, level, suffix, exp, profit, images });
+// Section filter
+document.getElementById("sectionSelector").addEventListener("change", e=>{
+  currentSection = e.target.value;
   renderTable();
-}
+});
 
 // Render table
 function renderTable() {
   const tbody = document.getElementById("spotsBody");
   tbody.innerHTML = "";
-  spots.forEach(s => {
+  spots.filter(s => currentSection==='All' || s.section===currentSection).forEach(s => {
     const tr = document.createElement("tr");
-    const imagesHTML = s.images.map(i => `<img src="${i}">`).join("");
+    const imagesHTML = s.images.map(i => `<img src="${i}" class="thumb" onclick="showImage('${i}')">`).join("");
     tr.innerHTML = `
       <td>${s.spot}</td>
+      <td>${s.section}</td>
       <td>${s.level}${s.suffix || ""}</td>
       <td>${s.exp}</td>
       <td>${s.profit}</td>
@@ -104,49 +110,111 @@ function renderTable() {
   });
 }
 
-// Sort table
-function sortTable(key) {
-  spots.sort((a,b) => {
-    if(sortDirection[key]) return a[key] - b[key];
-    else return b[key] - a[key];
-  });
+// Image modal
+function showImage(src) {
+  const modal = document.getElementById("imageModal");
+  document.getElementById("modalImg").src = src;
+  modal.style.display = "flex";
+}
+document.getElementById("imageModal").onclick = function(){ this.style.display="none"; }
+
+// Sorting
+function sortTable(key){
+  spots.sort((a,b)=>sortDirection[key]?a[key]-b[key]:b[key]-a[key]);
   sortDirection[key] = !sortDirection[key];
+  // Reset headers
+  ['level','exp','profit'].forEach(h=>{
+    document.getElementById(h+'Header').innerHTML = h.charAt(0).toUpperCase()+h.slice(1);
+  });
+  // Add arrow
+  const arrow = sortDirection[key] ? " ↑":" ↓";
+  document.getElementById(key+'Header').innerHTML += arrow;
   renderTable();
 }
+['level','exp','profit'].forEach(k=>document.getElementById(k+'Header').onclick=()=>sortTable(k));
 
-// Download backup
-function downloadBackup() {
+// Password login
+function checkPassword() {
+  if(document.getElementById("password").value === PASSWORD){
+    document.getElementById("formDiv").style.display = "block";
+    document.getElementById("loginDiv").style.display = "none";
+  } else {
+    alert("Incorrect password");
+  }
+}
+
+// Image preview
+document.getElementById("images").addEventListener("change", function(){
+  const preview = document.getElementById("imagePreview");
+  preview.innerHTML = "";
+  Array.from(this.files).forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const img = document.createElement("img");
+      img.src = e.target.result;
+      preview.appendChild(img);
+    }
+    reader.readAsDataURL(file);
+  });
+});
+
+// Add spot
+document.getElementById("addSpotForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  const files = document.getElementById("images").files;
+  const imagesArray = Array.from(files).map(f => URL.createObjectURL(f));
+  spots.push({
+    spot: document.getElementById("spotName").value,
+    section: document.getElementById("section").value,
+    level: Number(document.getElementById("level").value),
+    exp: Number(document.getElementById("exp").value),
+    profit: Number(document.getElementById("profit").value),
+    images: imagesArray
+  });
+  renderTable();
+  this.reset();
+  document.getElementById("imagePreview").innerHTML = "";
+});
+
+// Save Backup
+document.getElementById("backupBtn").addEventListener("click", ()=>{
   const dataStr = JSON.stringify(spots, null, 2);
-  const blob = new Blob([dataStr], { type: "application/json" });
+  const blob = new Blob([dataStr], {type:"application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "spots_backup.json";
+  a.download = "tibia_hunt_spots_backup.json";
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
+});
 
-// Restore backup
-function restoreBackup(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+// Load Backup
+document.getElementById("loadBackupBtn").addEventListener("click", ()=>{
+  const fileInput = document.getElementById("loadBackupInput");
+  if(fileInput.files.length === 0){
+    alert("Please select a JSON backup file first.");
+    return;
+  }
+  const file = fileInput.files[0];
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function(e){
     try {
-      const data = JSON.parse(e.target.result);
-      if (Array.isArray(data)) {
-        spots = data;
+      const loadedSpots = JSON.parse(e.target.result);
+      if(Array.isArray(loadedSpots)){
+        spots = loadedSpots;
         renderTable();
-        alert("Backup restored successfully!");
+        alert("Backup loaded successfully!");
       } else {
-        alert("Invalid backup file.");
+        alert("Invalid backup format.");
       }
-    } catch(err) {
-      alert("Error reading backup file.");
+    } catch(err){
+      alert("Error reading backup: " + err);
     }
   };
   reader.readAsText(file);
-}
+});
 </script>
 
 </body>
