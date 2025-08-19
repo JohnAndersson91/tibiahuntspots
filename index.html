@@ -17,6 +17,7 @@
         input[type=text], input[type=number], input[type=file] { padding: 4px; border-radius: 4px; border: 1px solid #555; background-color: #333; color: #eee; }
         button.addBtn { background-color: #007bff; color: #fff; }
         button.removeBtn { background-color: #ff4c4c; color: #fff; }
+        button.backupBtn { background-color: #28a745; color: #fff; margin-right: 10px; }
         #login-screen { padding: 50px; text-align: center; }
         #login-screen input { padding: 8px; border-radius: 4px; border: 1px solid #555; background-color: #333; color: #eee; }
     </style>
@@ -48,7 +49,7 @@
 </div>
 
 <script>
-const PASSWORD = "mypassword123"; // set your own password
+const PASSWORD = "mypassword123"; // change to your password
 const SECTIONS = ['knight','paladin','mage','monk','duo'];
 
 function checkPassword() {
@@ -68,11 +69,16 @@ function showSection(id) {
     document.getElementById(id).classList.add('active');
 }
 
-// Initialize all sections with form and table
+// Initialize all sections with form, table, and backup buttons
 function initializeSections() {
     SECTIONS.forEach(sec => {
         const section = document.getElementById(sec);
         section.innerHTML = `
+        <div style="margin-bottom:10px;">
+            <button class="backupBtn" onclick="downloadBackup()">Download Backup</button>
+            <input type="file" id="restoreFile" style="display:none" onchange="restoreBackup(event)">
+            <button class="backupBtn" onclick="document.getElementById('restoreFile').click()">Restore Backup</button>
+        </div>
         <form onsubmit="addSpot(event, '${sec}')">
             <input type="text" name="spot" placeholder="Spot Name" required>
             <input type="number" name="level" placeholder="Level" required>
@@ -182,20 +188,53 @@ function sortTable(tableId, colIndex){
     if(!table.sortDirection) table.sortDirection = 1;
     else table.sortDirection *= -1;
 
-    // Get rows excluding header
     const rows = Array.from(table.rows).slice(1);
-
-    // Sort rows
     rows.sort((a,b) => {
         const valA = parseFloat(a.cells[colIndex].innerText) || 0;
         const valB = parseFloat(b.cells[colIndex].innerText) || 0;
         return (valA - valB) * table.sortDirection;
     });
-
-    // Remove old rows from table
     rows.forEach(row => table.appendChild(row));
 }
-</script>
 
+// Download backup
+function downloadBackup() {
+    const backup = {};
+    SECTIONS.forEach(sec => {
+        backup[sec] = JSON.parse(localStorage.getItem(sec) || "[]");
+    });
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", "tibia_huntspots_backup.json");
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+}
+
+// Restore backup
+function restoreBackup(event){
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const backup = JSON.parse(e.target.result);
+            SECTIONS.forEach(sec => {
+                localStorage.setItem(sec, JSON.stringify(backup[sec] || []));
+            });
+            SECTIONS.forEach(sec => {
+                const table = document.getElementById('table-'+sec);
+                while(table.rows.length > 1) table.deleteRow(1);
+            });
+            loadAllSpots();
+            alert("Backup restored successfully!");
+        } catch(err){
+            alert("Invalid backup file!");
+        }
+    }
+    reader.readAsText(file);
+}
+</script>
 </body>
 </html>
