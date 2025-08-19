@@ -87,34 +87,60 @@
 </div>
 
 <script>
+  /* FIREBASE ADDED START */
+// Your Firebase config here
+const firebaseConfig = {
+  apiKey: "AIzaSyBkmHIc3xwSz4zoNX1R3OxCPfcoSYUyfB4",
+  authDomain: "tibiahuntspots.firebaseapp.com",
+  projectId: "tibiahuntspots",
+  storageBucket: "tibiahuntspots.firebasestorage.app",
+  messagingSenderId: "1095180317117",
+  appId: "1:1095180317117:web:57bd4d2cf8b22edec4a2d4"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const spotsRef = db.ref('spots');
+/* FIREBASE ADDED END */
+
+  
 let spots = [];
 let currentSection = 'All';
 let sortState = {level:null, exp:null, profit:null}; // null=unsorted, true=asc, false=desc
 const PASSWORD = "willchange321"; // change this
 
-// Section filter
-document.getElementById("sectionSelector").addEventListener("change", e=>{
-  currentSection = e.target.value;
-  renderTable();
+/* FIREBASE ADDED START */
+// Load spots from Firebase in real time
+let spots = {};
+const tbody = document.getElementById("spotsBody");
+spotsRef.on("value", snapshot => {
+  spots = snapshot.val() || {};
+  renderFirebaseTable();
 });
 
-// Render table
-function renderTable() {
-  const tbody = document.getElementById("spotsBody");
+function renderFirebaseTable() {
   tbody.innerHTML = "";
-  spots.filter(s => currentSection==='All' || s.section===currentSection).forEach(s => {
+  Object.keys(spots).forEach(key => {
+    const s = spots[key];
+    if(currentSection !== 'All' && s.section !== currentSection) return;
+
     const tr = document.createElement("tr");
-    const imagesHTML = s.images.map(i => `<img src="${i}" class="thumb" onclick="showImage('${i}')">`).join("");
+    const imagesHTML = (s.images || []).map(i => `<img src="${i}" class="thumb" onclick="showImage('${i}')">`).join("");
+
     tr.innerHTML = `
       <td>${s.spot}</td>
-      <td>${s.level}${s.suffix || ""}</td>
+      <td>${s.level}</td>
       <td>${s.exp}</td>
       <td>${s.profit}</td>
       <td>${imagesHTML}</td>
     `;
+
+    tr.classList.add("highlight"); // highlight newly added row
+    setTimeout(() => tr.classList.remove("highlight"), 2000);
+
     tbody.appendChild(tr);
   });
 }
+/* FIREBASE ADDED END */
 
 // Image modal
 function showImage(src) {
@@ -141,7 +167,7 @@ function sortTable(key){
     if(h===key) arrowEl.textContent = sortState[key] ? "↑":"↓";
   });
 
-  renderTable();
+  renderFirebaseTable();
 }
 ['level','exp','profit'].forEach(k=>document.getElementById(k+'Header').onclick=()=>sortTable(k));
 
@@ -170,23 +196,27 @@ document.getElementById("images").addEventListener("change", function(){
   });
 });
 
-// Add spot
+/* FIREBASE ADDED START */
+// Add spot pushes to Firebase
 document.getElementById("addSpotForm").addEventListener("submit", function(e){
   e.preventDefault();
   const files = document.getElementById("images").files;
   const imagesArray = Array.from(files).map(f => URL.createObjectURL(f));
-  spots.push({
+
+  const newSpot = {
     spot: document.getElementById("spotName").value,
     section: document.getElementById("sectionSelect").value,
     level: Number(document.getElementById("level").value),
     exp: Number(document.getElementById("exp").value),
     profit: Number(document.getElementById("profit").value),
     images: imagesArray
-  });
-  renderTable();
+  };
+
+  spotsRef.push(newSpot);
   this.reset();
   document.getElementById("imagePreview").innerHTML = "";
 });
+/* FIREBASE ADDED END */
 
 // Save Backup
 document.getElementById("backupBtn").addEventListener("click", ()=>{
