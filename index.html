@@ -224,13 +224,19 @@ function addSpot(event, sectionId) {
             row.insertCell(1).innerText = level;
             row.insertCell(2).innerText = exp;
             row.insertCell(3).innerText = profit;
-            const cell = row.insertCell(4);
+            const cellImages = row.insertCell(4);
             const image1 = document.createElement('img');
             image1.src = reader1.result;
             const image2 = document.createElement('img');
             image2.src = reader2.result;
-            cell.appendChild(image1);
-            cell.appendChild(image2);
+            cellImages.appendChild(image1);
+            cellImages.appendChild(image2);
+
+            const cellRemove = row.insertCell(5);
+            const removeBtn = document.createElement('button');
+            removeBtn.innerText = "Remove";
+            removeBtn.onclick = () => row.remove();
+            cellRemove.appendChild(removeBtn);
         }
         reader2.readAsDataURL(img2);
     }
@@ -238,19 +244,22 @@ function addSpot(event, sectionId) {
 
     form.reset();
 }
-    function sortTable(tableId, colIndex, isNumeric) {
+
+// Sort table
+function sortTable(tableId, colIndex, isNumeric) {
     const table = document.getElementById(tableId);
     const rows = Array.from(table.rows).slice(1); // skip header
     rows.sort((a, b) => {
         let valA = a.cells[colIndex].innerText;
         let valB = b.cells[colIndex].innerText;
-        if (isNumeric) {
-            valA = parseFloat(valA.replace(/,/g, '')) || 0;
-            valB = parseFloat(valB.replace(/,/g, '')) || 0;
+        if(isNumeric) {
+            valA = parseFloat(valA) || 0;
+            valB = parseFloat(valB) || 0;
         }
         return valA > valB ? 1 : valA < valB ? -1 : 0;
     });
     rows.forEach(row => table.appendChild(row));
+}
 </script>
 
 </body>
