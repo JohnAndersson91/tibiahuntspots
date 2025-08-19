@@ -57,7 +57,7 @@
 </div>
 
 <script>
-const PASSWORD = "mypassword123"; // Change your password here
+const PASSWORD = "willchange321"; // Change your password here
 
 const SECTIONS = ["knight","paladin","mage","monk","duo"];
 let activeSection = "knight";
@@ -92,7 +92,7 @@ function renderTables(){
     ["Hunting Spot","Level","Raw Exp","Profit","Images","Actions"].forEach((h,i)=>{
       const thElem = document.createElement("th");
       thElem.textContent = h;
-      if(i>0 && i<4) thElem.onclick = ()=>sortSection(sec,h.toLowerCase().replace(" ",""));
+      if(i>0 && i<4) thElem.onclick = ()=>sortSection(sec,h.toLowerCase().replace(/ /g,""));
       th.appendChild(thElem);
     });
     table.appendChild(th);
@@ -124,7 +124,10 @@ function renderTables(){
 
 // Sorting
 function sortSection(section,key){
-  data[section].sort((a,b)=>b[key]-a[key]);
+  const keyMap = {level:"level", rawexp:"exp", profit:"profit"};
+  const dataKey = keyMap[key];
+  if(!dataKey) return;
+  data[section].sort((a,b)=>b[dataKey]-a[dataKey]);
   renderTables();
 }
 
@@ -137,7 +140,6 @@ function addSpot(){
   const exp = parseInt(document.getElementById("newExp").value)||0;
   const profit = parseInt(document.getElementById("newProfit").value)||0;
 
-  // Handle optional images
   const img1File = document.getElementById("newImage1").files[0];
   const img2File = document.getElementById("newImage2").files[0];
 
@@ -150,7 +152,7 @@ function addSpot(){
   data[sec].push({spot,level,exp,profit,images});
   renderTables();
 
-  // Clear input fields
+  // Clear inputs
   document.getElementById("newSpot").value="";
   document.getElementById("newLevel").value="";
   document.getElementById("newExp").value="";
@@ -173,7 +175,7 @@ function checkPassword(){
   if(input === PASSWORD){
     document.getElementById("manage").style.display = "block";
     document.getElementById("login").style.display = "none";
-    renderTables(); // show remove buttons
+    renderTables();
   } else {
     alert("Incorrect password");
   }
