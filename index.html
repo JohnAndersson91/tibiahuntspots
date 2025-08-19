@@ -1,210 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tibia Hunt Spots</title>
-<style>
-body {
-    background-color: #1a1a1a;
-    color: #f0f0f0;
-    font-family: Arial, sans-serif;
-    margin: 0;
-}
-nav {
-    background-color: #111;
-    display: flex;
-    justify-content: center;
-    padding: 10px 0;
-}
-nav a {
-    color: #f0f0f0;
-    text-decoration: none;
-    margin: 0 15px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.3s;
-}
-nav a:hover {
-    color: #00bfff;
-}
-section {
-    display: none;
-    padding: 20px;
-    text-align: center;
-}
-section.active {
-    display: block;
-}
-h1 {
-    margin-bottom: 20px;
-}
-table {
-    width: 90%;
-    margin: 0 auto;
-    border-collapse: collapse;
-    margin-bottom: 30px;
-}
-th, td {
-    border: 1px solid #555;
-    padding: 10px;
-}
-th {
-    background-color: #222;
-}
-tr:nth-child(even) {
-    background-color: #2a2a2a;
-}
-tr:hover {
-    background-color: #333;
-}
-img {
-    max-width: 100px;
-    margin: 5px;
-}
-form {
-    margin-bottom: 30px;
-}
-input, select {
-    margin: 5px;
-    padding: 5px;
-}
-button {
-    padding: 5px 10px;
-    cursor: pointer;
-}
-</style>
+    <title>Tibia Hunt Spots</title>
+    <style>
+        body { background-color: #222; color: #eee; font-family: sans-serif; margin: 0; padding: 0; }
+        nav { background-color: #111; padding: 10px; display: flex; gap: 10px; }
+        nav button { padding: 8px 12px; cursor: pointer; background: #333; color: #eee; border: none; border-radius: 4px; }
+        nav button:hover { background: #555; }
+        section { display: none; padding: 20px; }
+        section.active { display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #555; padding: 8px; text-align: center; }
+        th { cursor: pointer; background-color: #333; }
+        img { width: 80px; height: 80px; margin: 2px; }
+        form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+        input[type=text], input[type=number], input[type=file] { padding: 4px; border-radius: 4px; border: 1px solid #555; background-color: #333; color: #eee; }
+        button.addBtn { background-color: #007bff; color: #fff; }
+        button.removeBtn { background-color: #ff4c4c; color: #fff; }
+        #login-screen { padding: 50px; text-align: center; }
+        #login-screen input { padding: 8px; border-radius: 4px; border: 1px solid #555; background-color: #333; color: #eee; }
+    </style>
 </head>
 <body>
 
+<div id="login-screen">
+    <h2>Enter Password to Manage Spots</h2>
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="checkPassword()">Login</button>
+</div>
+
+<div id="main-content" style="display:none;">
+
 <nav>
-    <a onclick="showSection('knight')">Knight</a>
-    <a onclick="showSection('paladin')">Paladin</a>
-    <a onclick="showSection('mages')">Mages</a>
-    <a onclick="showSection('monk')">Monk</a>
-    <a onclick="showSection('duo')">Duo</a>
+    <button onclick="showSection('knight')">Knight</button>
+    <button onclick="showSection('paladin')">Paladin</button>
+    <button onclick="showSection('mage')">Mage</button>
+    <button onclick="showSection('monk')">Monk</button>
+    <button onclick="showSection('duo')">Duo</button>
 </nav>
 
-<section id="knight" class="active">
-    <h1>Knight Hunting Spots</h1>
-    <form onsubmit="addSpot(event, 'knight')">
-        <input type="text" placeholder="Hunting Spot" name="spot" required>
-        <input type="text" placeholder="Level" name="level" required>
-        <input type="text" placeholder="Raw Exp" name="exp" required>
-        <input type="text" placeholder="Profit" name="profit" required>
-        <input type="file" name="img1" accept="image/*" required>
-        <input type="file" name="img2" accept="image/*" required>
-        <button type="submit">Add Spot</button>
-    </form>
-    <table id="table-knight">
-        <tr>
-            <th>Hunting Spot</th>
-            <th>Level</th>
-            <th>Raw Exp</th>
-            <th>Profit</th>
-            <th>Images</th>
-        </tr>
-    </table>
-</section>
+<section id="knight" class="active"></section>
+<section id="paladin"></section>
+<section id="mage"></section>
+<section id="monk"></section>
+<section id="duo"></section>
 
-<section id="paladin">
-    <h1>Paladin Hunting Spots</h1>
-    <form onsubmit="addSpot(event, 'paladin')">
-        <input type="text" placeholder="Hunting Spot" name="spot" required>
-        <input type="text" placeholder="Level" name="level" required>
-        <input type="text" placeholder="Raw Exp" name="exp" required>
-        <input type="text" placeholder="Profit" name="profit" required>
-        <input type="file" name="img1" accept="image/*" required>
-        <input type="file" name="img2" accept="image/*" required>
-        <button type="submit">Add Spot</button>
-    </form>
-    <table id="table-paladin">
-        <tr>
-            <th>Hunting Spot</th>
-            <th>Level</th>
-            <th>Raw Exp</th>
-            <th>Profit</th>
-            <th>Images</th>
-        </tr>
-    </table>
-</section>
-
-<section id="mages">
-    <h1>Mages Hunting Spots</h1>
-    <form onsubmit="addSpot(event, 'mages')">
-        <input type="text" placeholder="Hunting Spot" name="spot" required>
-        <input type="text" placeholder="Level" name="level" required>
-        <input type="text" placeholder="Raw Exp" name="exp" required>
-        <input type="text" placeholder="Profit" name="profit" required>
-        <input type="file" name="img1" accept="image/*" required>
-        <input type="file" name="img2" accept="image/*" required>
-        <button type="submit">Add Spot</button>
-    </form>
-    <table id="table-mages">
-        <tr>
-            <th>Hunting Spot</th>
-            <th>Level</th>
-            <th>Raw Exp</th>
-            <th>Profit</th>
-            <th>Images</th>
-        </tr>
-    </table>
-</section>
-
-<section id="monk">
-    <h1>Monk Hunting Spots</h1>
-    <form onsubmit="addSpot(event, 'monk')">
-        <input type="text" placeholder="Hunting Spot" name="spot" required>
-        <input type="text" placeholder="Level" name="level" required>
-        <input type="text" placeholder="Raw Exp" name="exp" required>
-        <input type="text" placeholder="Profit" name="profit" required>
-        <input type="file" name="img1" accept="image/*" required>
-        <input type="file" name="img2" accept="image/*" required>
-        <button type="submit">Add Spot</button>
-    </form>
-    <table id="table-monk">
-        <tr>
-            <th>Hunting Spot</th>
-            <th>Level</th>
-            <th>Raw Exp</th>
-            <th>Profit</th>
-            <th>Images</th>
-        </tr>
-    </table>
-</section>
-
-<section id="duo">
-    <h1>Duo Hunting Spots</h1>
-    <form onsubmit="addSpot(event, 'duo')">
-        <input type="text" placeholder="Hunting Spot" name="spot" required>
-        <input type="text" placeholder="Level" name="level" required>
-        <input type="text" placeholder="Raw Exp" name="exp" required>
-        <input type="text" placeholder="Profit" name="profit" required>
-        <input type="file" name="img1" accept="image/*" required>
-        <input type="file" name="img2" accept="image/*" required>
-        <button type="submit">Add Spot</button>
-    </form>
-    <table id="table-duo">
-        <tr>
-            <th>Hunting Spot</th>
-            <th>Level</th>
-            <th>Raw Exp</th>
-            <th>Profit</th>
-            <th>Images</th>
-        </tr>
-    </table>
-</section>
+</div>
 
 <script>
+const PASSWORD = "mypassword123"; // set your own password
+const SECTIONS = ['knight','paladin','mage','monk','duo'];
+
+function checkPassword() {
+    const input = document.getElementById('password').value;
+    if(input === PASSWORD){
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        initializeSections();
+        loadAllSpots();
+    } else {
+        alert("Incorrect password!");
+    }
+}
+
 function showSection(id) {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
 }
 
-function addSpot(event, sectionId) {
+// Initialize all sections with form and table
+function initializeSections() {
+    SECTIONS.forEach(sec => {
+        const section = document.getElementById(sec);
+        section.innerHTML = `
+        <form onsubmit="addSpot(event, '${sec}')">
+            <input type="text" name="spot" placeholder="Spot Name" required>
+            <input type="number" name="level" placeholder="Level" required>
+            <input type="number" name="exp" placeholder="Raw Exp" required>
+            <input type="number" name="profit" placeholder="Profit" required>
+            <input type="file" name="img1" required>
+            <input type="file" name="img2" required>
+            <button type="submit" class="addBtn">Add Spot</button>
+        </form>
+        <table id="table-${sec}">
+            <tr>
+                <th>Hunting Spot</th>
+                <th onclick="sortTable('table-${sec}',1)">Level ⬍</th>
+                <th onclick="sortTable('table-${sec}',2)">Raw Exp ⬍</th>
+                <th onclick="sortTable('table-${sec}',3)">Profit ⬍</th>
+                <th>Images</th>
+                <th>Remove</th>
+            </tr>
+        </table>`;
+    });
+}
+
+// Add spot
+function addSpot(event, sectionId){
     event.preventDefault();
     const form = event.target;
-    const table = document.getElementById('table-' + sectionId);
+    const table = document.getElementById('table-'+sectionId);
 
     const spot = form.spot.value;
     const level = form.level.value;
@@ -219,24 +114,12 @@ function addSpot(event, sectionId) {
 
     reader1.onload = () => {
         reader2.onload = () => {
-            const row = table.insertRow();
-            row.insertCell(0).innerText = spot;
-            row.insertCell(1).innerText = level;
-            row.insertCell(2).innerText = exp;
-            row.insertCell(3).innerText = profit;
-            const cellImages = row.insertCell(4);
-            const image1 = document.createElement('img');
-            image1.src = reader1.result;
-            const image2 = document.createElement('img');
-            image2.src = reader2.result;
-            cellImages.appendChild(image1);
-            cellImages.appendChild(image2);
-
-            const cellRemove = row.insertCell(5);
-            const removeBtn = document.createElement('button');
-            removeBtn.innerText = "Remove";
-            removeBtn.onclick = () => row.remove();
-            cellRemove.appendChild(removeBtn);
+            const rowData = {
+                spot, level, exp, profit,
+                img1: reader1.result, img2: reader2.result
+            };
+            saveSpot(sectionId, rowData);
+            renderSpot(sectionId, rowData);
         }
         reader2.readAsDataURL(img2);
     }
@@ -245,20 +128,71 @@ function addSpot(event, sectionId) {
     form.reset();
 }
 
-function sortTable(tableId, colIndex) {
-    const table = document.getElementById(tableId);
-    const rows = Array.from(table.rows).slice(1); // skip header row
+// Save spot to localStorage
+function saveSpot(sectionId, spotData){
+    let spots = JSON.parse(localStorage.getItem(sectionId) || "[]");
+    spots.push(spotData);
+    localStorage.setItem(sectionId, JSON.stringify(spots));
+}
 
-    // Toggle sort direction
-    if(!table.sortDirection) table.sortDirection = 1; 
+// Render spot in table
+function renderSpot(sectionId, data){
+    const table = document.getElementById('table-'+sectionId);
+    const row = table.insertRow();
+    row.insertCell(0).innerText = data.spot;
+    row.insertCell(1).innerText = data.level;
+    row.insertCell(2).innerText = data.exp;
+    row.insertCell(3).innerText = data.profit;
+
+    const cellImages = row.insertCell(4);
+    const image1 = document.createElement('img');
+    image1.src = data.img1;
+    const image2 = document.createElement('img');
+    image2.src = data.img2;
+    cellImages.appendChild(image1);
+    cellImages.appendChild(image2);
+
+    const cellRemove = row.insertCell(5);
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'removeBtn';
+    removeBtn.innerText = "Remove";
+    removeBtn.onclick = () => removeSpot(sectionId, row, data);
+    cellRemove.appendChild(removeBtn);
+}
+
+// Remove spot
+function removeSpot(sectionId, row, data){
+    row.remove();
+    let spots = JSON.parse(localStorage.getItem(sectionId) || "[]");
+    spots = spots.filter(s => !(s.spot===data.spot && s.level===data.level && s.exp===data.exp && s.profit===data.profit));
+    localStorage.setItem(sectionId, JSON.stringify(spots));
+}
+
+// Load all spots from localStorage
+function loadAllSpots(){
+    SECTIONS.forEach(sec => {
+        let spots = JSON.parse(localStorage.getItem(sec) || "[]");
+        spots.forEach(s => renderSpot(sec, s));
+    });
+}
+
+// Sort table visually without changing localStorage
+function sortTable(tableId, colIndex){
+    const table = document.getElementById(tableId);
+    if(!table.sortDirection) table.sortDirection = 1;
     else table.sortDirection *= -1;
 
-    rows.sort((a, b) => {
-        const valA = parseFloat(a.cells[colIndex].innerText.replace(/,/g,'')) || 0;
-        const valB = parseFloat(b.cells[colIndex].innerText.replace(/,/g,'')) || 0;
+    // Get rows excluding header
+    const rows = Array.from(table.rows).slice(1);
+
+    // Sort rows
+    rows.sort((a,b) => {
+        const valA = parseFloat(a.cells[colIndex].innerText) || 0;
+        const valB = parseFloat(b.cells[colIndex].innerText) || 0;
         return (valA - valB) * table.sortDirection;
     });
 
+    // Remove old rows from table
     rows.forEach(row => table.appendChild(row));
 }
 </script>
