@@ -14,6 +14,7 @@
   .tab.active { background: #555; }
   #manage { margin-top: 20px; padding: 10px; border: 1px solid #555; display: none; }
   input, button, select { margin: 5px 0; padding: 5px; }
+  th .sort-arrow { margin-left: 5px; font-size: 0.8em; }
 </style>
 </head>
 <body>
@@ -54,6 +55,11 @@
     <input type="file" id="newImage2" accept="image/*">
     <button onclick="addSpot()">Add Spot</button>
   </div>
+  <div>
+    <button onclick="downloadBackup()">Download Backup</button>
+    <input type="file" id="uploadBackup" accept=".json">
+    <button onclick="uploadBackup()">Upload Backup</button>
+  </div>
 </div>
 
 <script>
@@ -61,6 +67,7 @@ const PASSWORD = "willchange321"; // Change your password here
 
 const SECTIONS = ["knight","paladin","mage","monk","duo"];
 let activeSection = "knight";
+let sortState = {}; // Track ascending/descending per section-column
 
 let data = {
   knight: [],
@@ -89,19 +96,26 @@ function renderTables(){
     const sectionData = data[sec];
     const table = document.createElement("table");
     const th = document.createElement("tr");
-    ["Hunting Spot","Level","Raw Exp","Profit","Images","Actions"].forEach((h,i)=>{
+    const headers = ["Hunting Spot","Level","Raw Exp","Profit","Images","Actions"];
+    headers.forEach((h,i)=>{
       const thElem = document.createElement("th");
       thElem.textContent = h;
-      if(i>0 && i<4) thElem.onclick = ()=>sortSection(sec,h.toLowerCase().replace(/ /g,""));
+      if(i>0 && i<4){ // Make sortable
+        thElem.onclick = ()=>sortSection(sec,h.toLowerCase().replace(/ /g,""));
+        const arrowSpan = document.createElement("span");
+        arrowSpan.className = "sort-arrow";
+        if(sortState[sec] && sortState[sec].key===h.toLowerCase().replace(/ /g,"")){
+          arrowSpan.textContent = sortState[sec].asc ? "▲" : "▼";
+        }
+        thElem.appendChild(arrowSpan);
+      }
       th.appendChild(thElem);
     });
     table.appendChild(th);
+
     sectionData.forEach((s,index)=>{
       const tr = document.createElement("tr");
-      const imagesHTML = s.images.map(img=>{
-        if(img) return `<img src="${img}" width="50">`; 
-        else return "";
-      }).join("");
+      const imagesHTML = s.images.map(img=> img ? `<img src="${img}" width="50">` : "").join("");
       const actionsHTML = document.getElementById("manage").style.display === "block" 
                           ? `<button onclick="removeSpot('${sec}',${index})">Remove</button>` 
                           : "";
@@ -127,7 +141,17 @@ function sortSection(section,key){
   const keyMap = {level:"level", rawexp:"exp", profit:"profit"};
   const dataKey = keyMap[key];
   if(!dataKey) return;
-  data[section].sort((a,b)=>b[dataKey]-a[dataKey]);
+
+  // Toggle ascending/descending
+  if(!sortState[section]) sortState[section] = {key,asc:false};
+  if(sortState[section].key === key) sortState[section].asc = !sortState[section].asc;
+  else sortState[section] = {key,asc:true};
+
+  const asc = sortState[section].asc;
+  data[section].sort((a,b)=>{
+    return asc ? a[dataKey]-b[dataKey] : b[dataKey]-a[dataKey];
+  });
+
   renderTables();
 }
 
@@ -152,7 +176,6 @@ function addSpot(){
   data[sec].push({spot,level,exp,profit,images});
   renderTables();
 
-  // Clear inputs
   document.getElementById("newSpot").value="";
   document.getElementById("newLevel").value="";
   document.getElementById("newExp").value="";
@@ -179,6 +202,40 @@ function checkPassword(){
   } else {
     alert("Incorrect password");
   }
+}
+
+// Backup download
+function downloadBackup() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "hunting_spots_backup.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Backup upload
+function uploadBackup() {
+  const fileInput = document.getElementById("uploadBackup");
+  const file = fileInput.files[0];
+  if(!file) { alert("Select a JSON file first"); return; }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const uploadedData = JSON.parse(e.target.result);
+      SECTIONS.forEach(sec=>{
+        if(!uploadedData[sec]) uploadedData[sec]=[];
+      });
+      data = uploadedData;
+      renderTables();
+      alert("Backup restored successfully!");
+    } catch(err) {
+      alert("Invalid JSON file");
+    }
+  }
+  reader.readAsText(file);
 }
 
 // Initial render
