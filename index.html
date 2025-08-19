@@ -1,25 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello World</title>
-  <style>
-    body {
-      background-color: #1e1e1e;
-      color: #f0f0f0;
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    h1 {
-      color: #ffcc00;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tibia Hunt Spots</title>
+<style>
+  body { background:#1e1e1e; color:#f0f0f0; font-family:sans-serif; padding:20px; }
+  table { width:100%; border-collapse: collapse; margin-top:20px; }
+  th, td { border:1px solid #444; padding:8px; text-align:left; }
+  th { cursor:pointer; user-select:none; }
+  th .arrow { font-size:0.8em; margin-left:5px; color:#ffcc00; }
+  img.thumb { max-width:50px; max-height:50px; margin:2px; cursor:pointer; }
+  #imagePreview img { max-width:50px; max-height:50px; margin:2px; }
+  #addSpotForm { margin-top:20px; display:flex; flex-direction:column; gap:5px; }
+  input, button, select { padding:5px; border-radius:4px; border:none; }
+  button { cursor:pointer; background:#555; color:#fff; }
+</style>
 </head>
 <body>
-  <h1>Hello World!</h1>
+
+<h1>Tibia Hunt Spots</h1>
+
+<!-- Section Selector -->
+<select id="sectionSelector">
+  <option value="All">All Classes</option>
+  <option value="Knight">Knight</option>
+  <option value="Paladin">Paladin</option>
+  <option value="Mages">Mages</option>
+  <option value="Monk">Monk</option>
+  <option value="Duo">Duo</option>
+</select>
+
+<!-- Spots Table -->
+<table>
+  <thead>
+    <tr>
+      <th>Spot</th>
+      <th id="levelHeader">Level <span class="arrow"></span></th>
+      <th id="expHeader">Raw Exp <span class="arrow"></span></th>
+      <th id="profitHeader">Profit <span class="arrow"></span></th>
+      <th>Images</th>
+    </tr>
+  </thead>
+  <tbody id="spotsBody"></tbody>
+</table>
+
+<!-- Add Spot Form -->
+<div id="formDiv">
+  <form id="addSpotForm">
+    <input type="text" id="spotName" placeholder="Spot Name" required>
+    <select id="sectionSelect" required>
+      <option value="" disabled selected>Select Class</option>
+      <option value="Knight">Knight</option>
+      <option value="Paladin">Paladin</option>
+      <option value="Mages">Mages</option>
+      <option value="Monk">Monk</option>
+      <option value="Duo">Duo</option>
+    </select>
+    <input type="number" id="level" placeholder="Level" required>
+    <input type="number" id="exp" placeholder="Raw Exp" required>
+    <input type="number" id="profit" placeholder="Profit" required>
+    <input type="file" id="images" multiple accept="image/*">
+    <div id="imagePreview"></div>
+    <button type="submit">Add Spot</button>
+  </form>
+</div>
+
+<script>
+let spots = [];
+let currentSection = 'All';
+let sortState = {level:null, exp:null, profit:null}; 
+
+const tbody = document.getElementById("spotsBody");
+
+// Render table
+function renderTable() {
+  tbody.innerHTML = "";
+  spots.forEach(s => {
+    if(currentSection !== 'All' && s.section !== currentSection) return;
+
+    const tr = document.createElement("tr");
+    const imagesHTML = (s.images || []).map(i => `<img src="${i}" class="thumb">`).join("");
+
+    tr.innerHTML = `
+      <td>${s.spot}</td>
+      <td>${s.level}</td>
+      <td>${s.exp}</td>
+      <td>${s.profit}</td>
+      <td>${imagesHTML}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Sorting
+function sortTable(key){
+  if(sortState[key] === null) sortState[key] = true;
+  else sortState[key] = !sortState[key];
+
+  spots.sort((a,b)=>{
+    return sortState[key] ? a[key]-b[key] : b[key]-a[key];
+  });
+
+  ['level','exp','profit'].forEach(h=>{
+    const arrowEl = document.querySelector("#"+h+"Header .arrow");
+    arrowEl.textContent = "";
+    if(h===key) arrowEl.textContent = sortState[key] ? "↑":"↓";
+  });
+
+  renderTable();
+}
+['level','exp','profit'].forEach(k=>document.getElementById(k+'Header').onclick=()=>sortTable(k));
+
+// Section filter
+document.getElementById("sectionSelector").addEventListener("change", e=>{
+  currentSection = e.target.value;
+  renderTable();
+});
+
+// Image preview
+document.getElementById("images").addEventListener("change", function(){
+  const preview = document.getElementById("imagePreview");
+  preview.innerHTML = "";
+  Array.from(this.files).forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const img = document.createElement("img");
+      img.src = e.target.result;
+      preview.appendChild(img);
+    }
+    reader.readAsDataURL(file);
+  });
+});
+
+// Add spot
+document.getElementById("addSpotForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  const files = document.getElementById("images").files;
+  const imagesArray = Array.from(files).map(f => URL.createObjectURL(f));
+
+  const newSpot = {
+    spot: document.getElementById("spotName").value,
+    section: document.getElementById("sectionSelect").value,
+    level: Number(document.getElementById("level").value),
+    exp: Number(document.getElementById("exp").value),
+    profit: Number(document.getElementById("profit").value),
+    images: imagesArray
+  };
+
+  spots.push(newSpot);
+  this.reset();
+  document.getElementById("imagePreview").innerHTML = "";
+  renderTable();
+});
+
+renderTable();
+</script>
+
 </body>
 </html>
