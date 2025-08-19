@@ -1,231 +1,153 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hunting Spots</title>
-<style>
-  body { background-color: #1e1e1e; color: #eee; font-family: Arial, sans-serif; padding: 20px; }
-  table { border-collapse: collapse; margin-bottom: 20px; width: 100%; }
-  th, td { border: 1px solid #555; padding: 8px; text-align: left; }
-  th { cursor: pointer; background-color: #333; }
-  tr:nth-child(even) { background-color: #2a2a2a; }
-  .tab { cursor: pointer; display: inline-block; padding: 10px; background: #333; margin-right: 5px; border-radius: 5px; }
-  .tab.active { background: #555; }
-  #manage { margin-top: 20px; padding: 10px; border: 1px solid #555; display: none; }
-  input, button, select { margin: 5px 0; padding: 5px; }
-  th .sort-arrow { margin-left: 5px; font-size: 0.8em; }
-</style>
+  <title>Tibia Hunt Spots</title>
+  <style>
+    body { background-color: #1e1e1e; color: #eee; font-family: sans-serif; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #555; padding: 8px; text-align: left; }
+    th { cursor: pointer; }
+    input, button { margin: 5px; }
+    img { max-width: 100px; max-height: 100px; }
+  </style>
 </head>
 <body>
 
-<h1>Hunting Spots</h1>
+<h1>Tibia Hunt Spots</h1>
 
-<div id="tabs"></div>
-<div id="tables"></div>
+<!-- Table visible to everyone -->
+<table id="spotsTable">
+  <thead>
+    <tr>
+      <th>Spot</th>
+      <th onclick="sortTable('level')">Level &#x25B2;&#x25BC;</th>
+      <th onclick="sortTable('exp')">Raw Exp &#x25B2;&#x25BC;</th>
+      <th onclick="sortTable('profit')">Profit &#x25B2;&#x25BC;</th>
+      <th>Images</th>
+    </tr>
+  </thead>
+  <tbody id="spotsBody"></tbody>
+</table>
 
-<div id="login">
-  <h3>Enter password to manage spots:</h3>
-  <input type="password" id="passwordInput">
-  <button onclick="checkPassword()">Enter</button>
+<!-- Admin panel only visible after login -->
+<div id="adminPanel" style="display:none;">
+  <h2>Manage Spots</h2>
+  <input id="spotName" placeholder="Spot Name">
+  <input id="level" placeholder="Level">
+  <input id="suffix" placeholder="Suffix (optional)">
+  <input id="exp" placeholder="Raw Exp">
+  <input id="profit" placeholder="Profit">
+  <input type="file" id="image1">
+  <input type="file" id="image2">
+  <button onclick="addSpot()">Add Spot</button>
+
+  <h3>Backup / Restore</h3>
+  <button onclick="downloadBackup()">Download Backup</button>
+  <input type="file" id="restoreFile" onchange="restoreBackup(event)">
 </div>
 
-<div id="manage">
-  <h3>Manage Spots</h3>
-  <div>
-    <label>Section: 
-      <select id="newSection">
-        <option value="knight">Knight</option>
-        <option value="paladin">Paladin</option>
-        <option value="mage">Mage</option>
-        <option value="monk">Monk</option>
-        <option value="duo">Duo</option>
-      </select>
-    </label><br>
-    <input type="text" id="newSpot" placeholder="Spot name">
-    <input type="number" id="newLevel" placeholder="Level">
-    <input type="number" id="newExp" placeholder="Raw Exp">
-    <input type="number" id="newProfit" placeholder="Profit">
-    <input type="file" id="newImage1" accept="image/*">
-    <input type="file" id="newImage2" accept="image/*">
-    <button onclick="addSpot()">Add Spot</button>
-  </div>
-  <div>
-    <button onclick="downloadBackup()">Download Backup</button>
-    <input type="file" id="uploadBackup" accept=".json">
-    <button onclick="uploadBackup()">Upload Backup</button>
-  </div>
+<!-- Login form -->
+<div id="loginForm">
+  <input type="password" id="passwordInput" placeholder="Enter password">
+  <button onclick="login()">Login</button>
 </div>
 
 <script>
-const PASSWORD = "willchange321"; // Change your password here
-const SECTIONS = ["knight","paladin","mage","monk","duo"];
-let activeSection = "knight";
-let sortState = {};
+const PASSWORD = "willchange321"; // change this to your desired password
+let spots = [];
+let sortDirection = { level: true, exp: true, profit: true };
 
-// Load or initialize data
-let data = JSON.parse(localStorage.getItem("huntingSpots")) || {
-  knight: [], paladin: [], mage: [], monk: [], duo: []
-};
-
-// Save data to localStorage
-function saveData() {
-  localStorage.setItem("huntingSpots", JSON.stringify(data));
-}
-
-// Tabs
-const tabsDiv = document.getElementById("tabs");
-SECTIONS.forEach(sec=>{
-  const tab = document.createElement("div");
-  tab.textContent = sec.charAt(0).toUpperCase() + sec.slice(1);
-  tab.className = "tab";
-  tab.onclick = ()=>{activeSection=sec; renderTables();}
-  tabsDiv.appendChild(tab);
-});
-
-// Render tables
-function renderTables(){
-  document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active", SECTIONS[i]===activeSection));
-  const tablesDiv = document.getElementById("tables");
-  tablesDiv.innerHTML = "";
-  SECTIONS.forEach(sec=>{
-    const sectionData = data[sec];
-    const table = document.createElement("table");
-    const th = document.createElement("tr");
-    const headers = ["Hunting Spot","Level","Raw Exp","Profit","Images","Actions"];
-    headers.forEach((h,i)=>{
-      const thElem = document.createElement("th");
-      thElem.textContent = h;
-      if(i>0 && i<4){
-        thElem.onclick = ()=>sortSection(sec,h.toLowerCase().replace(/ /g,""));
-        const arrowSpan = document.createElement("span");
-        arrowSpan.className = "sort-arrow";
-        if(sortState[sec] && sortState[sec].key===h.toLowerCase().replace(/ /g,"")){
-          arrowSpan.textContent = sortState[sec].asc ? "▲" : "▼";
-        }
-        thElem.appendChild(arrowSpan);
-      }
-      th.appendChild(thElem);
-    });
-    table.appendChild(th);
-
-    sectionData.forEach((s,index)=>{
-      const tr = document.createElement("tr");
-      const imagesHTML = s.images.map(img=> img ? `<img src="${img}" width="50">` : "").join("");
-      const actionsHTML = document.getElementById("manage").style.display === "block" 
-                          ? `<button onclick="removeSpot('${sec}',${index})">Remove</button>` 
-                          : "";
-      tr.innerHTML = `<td>${s.spot}</td>
-                      <td>${s.level}</td>
-                      <td>${s.exp + "k/h"}</td>
-                      <td>${s.profit "k/h"}</td>
-                      <td>${imagesHTML}</td>
-                      <td>${actionsHTML}</td>`;
-      table.appendChild(tr);
-    });
-    const header = document.createElement("h2");
-    header.textContent = sec.charAt(0).toUpperCase()+sec.slice(1);
-    if(sec===activeSection){
-      tablesDiv.appendChild(header);
-      tablesDiv.appendChild(table);
-    }
-  });
-}
-
-// Sorting
-function sortSection(section,key){
-  const keyMap = {level:"level", rawexp:"exp", profit:"profit"};
-  const dataKey = keyMap[key];
-  if(!dataKey) return;
-
-  if(!sortState[section]) sortState[section] = {key,asc:false};
-  if(sortState[section].key === key) sortState[section].asc = !sortState[section].asc;
-  else sortState[section] = {key,asc:true};
-
-  const asc = sortState[section].asc;
-  data[section].sort((a,b)=>asc ? a[dataKey]-b[dataKey] : b[dataKey]-a[dataKey]);
-  renderTables();
-}
-
-// Add spot
-function addSpot(){
-  const sec = document.getElementById("newSection").value;
-  const spot = document.getElementById("newSpot").value;
-  if(!spot) { alert("Spot name is required"); return; }
-  const level = parseInt(document.getElementById("newLevel").value)||0;
-  const exp = parseInt(document.getElementById("newExp").value)||0;
-  const profit = parseInt(document.getElementById("newProfit").value)||0;
-
-  const img1File = document.getElementById("newImage1").files[0];
-  const img2File = document.getElementById("newImage2").files[0];
-
-  let images = [];
-  if(img1File) images.push(URL.createObjectURL(img1File)); else images.push("");
-  if(img2File) images.push(URL.createObjectURL(img2File)); else images.push("");
-
-  data[sec].push({spot,level,exp,profit,images});
-  saveData(); // Save to localStorage
-  renderTables();
-
-  document.getElementById("newSpot").value="";
-  document.getElementById("newLevel").value="";
-  document.getElementById("newExp").value="";
-  document.getElementById("newProfit").value="";
-  document.getElementById("newImage1").value="";
-  document.getElementById("newImage2").value="";
-}
-
-// Remove spot
-function removeSpot(section,index){
-  if(confirm("Are you sure you want to remove this spot?")){
-    data[section].splice(index,1);
-    saveData();
-    renderTables();
+// Login function
+function login() {
+  const entered = document.getElementById("passwordInput").value;
+  if (entered === PASSWORD) {
+    document.getElementById("adminPanel").style.display = "block";
+    document.getElementById("loginForm").style.display = "none";
+  } else {
+    alert("Wrong password!");
   }
 }
 
-// Password check
-function checkPassword(){
-  const input = document.getElementById("passwordInput").value;
-  if(input === PASSWORD){
-    document.getElementById("manage").style.display = "block";
-    document.getElementById("login").style.display = "none";
-    renderTables();
-  } else { alert("Incorrect password"); }
+// Add spot
+function addSpot() {
+  const name = document.getElementById("spotName").value;
+  const level = parseInt(document.getElementById("level").value);
+  const suffix = document.getElementById("suffix").value;
+  const exp = parseInt(document.getElementById("exp").value);
+  const profit = parseInt(document.getElementById("profit").value);
+
+  const images = [];
+  const img1 = document.getElementById("image1").files[0];
+  const img2 = document.getElementById("image2").files[0];
+  if(img1) images.push(URL.createObjectURL(img1));
+  if(img2) images.push(URL.createObjectURL(img2));
+
+  spots.push({ spot: name, level, suffix, exp, profit, images });
+  renderTable();
 }
 
-// Backup download
+// Render table
+function renderTable() {
+  const tbody = document.getElementById("spotsBody");
+  tbody.innerHTML = "";
+  spots.forEach(s => {
+    const tr = document.createElement("tr");
+    const imagesHTML = s.images.map(i => `<img src="${i}">`).join("");
+    tr.innerHTML = `
+      <td>${s.spot}</td>
+      <td>${s.level}${s.suffix || ""}</td>
+      <td>${s.exp}</td>
+      <td>${s.profit}</td>
+      <td>${imagesHTML}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Sort table
+function sortTable(key) {
+  spots.sort((a,b) => {
+    if(sortDirection[key]) return a[key] - b[key];
+    else return b[key] - a[key];
+  });
+  sortDirection[key] = !sortDirection[key];
+  renderTable();
+}
+
+// Download backup
 function downloadBackup() {
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+  const dataStr = JSON.stringify(spots, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "hunting_spots_backup.json";
+  a.download = "spots_backup.json";
   a.click();
   URL.revokeObjectURL(url);
 }
 
-// Backup upload
-function uploadBackup() {
-  const fileInput = document.getElementById("uploadBackup");
-  const file = fileInput.files[0];
-  if(!file) { alert("Select a JSON file first"); return; }
-
+// Restore backup
+function restoreBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
-      const uploadedData = JSON.parse(e.target.result);
-      SECTIONS.forEach(sec=>{ if(!uploadedData[sec]) uploadedData[sec]=[]; });
-      data = uploadedData;
-      saveData();
-      renderTables();
-      alert("Backup restored successfully!");
-    } catch(err) { alert("Invalid JSON file"); }
-  }
+      const data = JSON.parse(e.target.result);
+      if (Array.isArray(data)) {
+        spots = data;
+        renderTable();
+        alert("Backup restored successfully!");
+      } else {
+        alert("Invalid backup file.");
+      }
+    } catch(err) {
+      alert("Error reading backup file.");
+    }
+  };
   reader.readAsText(file);
 }
-
-renderTables();
 </script>
+
 </body>
 </html>
