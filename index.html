@@ -46,6 +46,7 @@
       <th onclick="sortTable('profit')">Profit k/h <span id="profitArrow"></span></th>
       <th onclick="sortTable('playerLevel')">Player Level <span id="playerLevelArrow"></span></th>
       <th onclick="sortTable('playerSkills')">Player Skills <span id="playerSkillsArrow"></span></th>
+      <th onclick="sortTable('playerSkills')">Charms <span id="playerSkillsArrow"></span></th>
     </tr>
   </thead>
   <tbody id="spotsBody"></tbody>
@@ -69,6 +70,7 @@
     <input type="number" id="profit" placeholder="Profit gold k/h" required>
     <input type="number" id="playerLevel" placeholder="Player Level" required>
     <input type="text" id="playerSkills" placeholder="Player Skills" required>
+    <input type="text" id="charms" placeholder="Charms" required>
     <button type="submit">Add Spot</button>
   </form>
 </div>
@@ -77,15 +79,15 @@
 const PASSWORD = "willchange321"; // change this
 let spots = [
     // static spots
-  { spot: "Amazon camp", section: "Duo", levelReq: 8, exp: 12, profit: 51, playerLevel: 15, playerSkills: "d52 m4 + m11" },
-  { spot: "Ancient Temple", section: "Knight", levelReq: 20, exp: 20, profit: 0, playerLevel: 98, playerSkills: "s91 m7" },
-  { spot: "Amazon camp", section: "Knight", levelReq: 8, exp: 60, profit: 171, playerLevel: 98, playerSkills: "s91 m7" },
-  { spot: "Shadowthorn", section: "Knight", levelReq: 12, exp: 65, profit: 120, playerLevel: 98, playerSkills: "s91 m7" },
-  { spot: "Banuta", section: "Knight", levelReq: 45, exp: 100, profit: -10, playerLevel: 98, playerSkills: "s91 m7" },
-  { spot: "Mount Sternum", section: "Knight", levelReq: 40, exp: 77, profit: 70, playerLevel: 98, playerSkills: "s91 m7" },
-  { spot: "Corym Mines(Stonerefiner)", section: "Knight", levelReq: 35, exp: 201, profit: 97, playerLevel: 99, playerSkills: "s91 m7" },
-  { spot: "Falcon Bastion", section: "Mages", levelReq: 500, exp: 6259, profit: 1260, playerLevel: 583, playerSkills: " m152" },
-  { spot: "Arena and Zoo Quarter", section: "Knight", levelReq: 70, exp: 225, profit: 66, playerLevel: 99, playerSkills: "s91 m7" },
+  { spot: "Amazon camp", section: "Duo", levelReq: 8, exp: 12, profit: 51, playerLevel: 15, playerSkills: "d52 m4 + m11", charms: "No" },
+  { spot: "Ancient Temple", section: "Knight", levelReq: 20, exp: 20, profit: 0, playerLevel: 98, playerSkills: "s91 m7", charms: "No"  },
+  { spot: "Amazon camp", section: "Knight", levelReq: 8, exp: 60, profit: 171, playerLevel: 98, playerSkills: "s91 m7", charms: "No"  },
+  { spot: "Shadowthorn", section: "Knight", levelReq: 12, exp: 65, profit: 120, playerLevel: 98, playerSkills: "s91 m7", charms: "No"  },
+  { spot: "Banuta", section: "Knight", levelReq: 45, exp: 100, profit: -10, playerLevel: 98, playerSkills: "s91 m7", charms: "No"  },
+  { spot: "Mount Sternum", section: "Knight", levelReq: 40, exp: 77, profit: 70, playerLevel: 98, playerSkills: "s91 m7", charms: "No"  },
+  { spot: "Corym Mines(Stonerefiner)", section: "Knight", levelReq: 35, exp: 201, profit: 97, playerLevel: 99, playerSkills: "s91 m7", charms: "No"  },
+  { spot: "Falcon Bastion", section: "Mages", levelReq: 500, exp: 6259, profit: 1260, playerLevel: 583, playerSkills: " m152", charms: "Yes"  },
+  { spot: "Arena and Zoo Quarter", section: "Knight", levelReq: 70, exp: 225, profit: 66, playerLevel: 99, playerSkills: "s91 m7", charms: "No"  },
 ];
 let currentSection = 'All';
 let sortConfig = { key: null, asc: true };
@@ -103,6 +105,7 @@ function renderTable() {
       <td>${s.profit}</td>
       <td>${s.playerLevel}</td>
       <td>${s.playerSkills}</td>
+      <td>${s.charms}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -123,6 +126,7 @@ document.getElementById("addSpotForm").addEventListener("submit", e=>{
     profit: Number(document.getElementById("profit").value),
     playerLevel: Number(document.getElementById("playerLevel").value),
     playerSkills: document.getElementById("playerSkills").value,
+    charms: document.getElementById("charms").value,
   };
   spots.push(newSpot);
   renderTable();
